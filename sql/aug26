@@ -1,0 +1,122 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.3
+-- https://www.phpmyadmin.net/
+--
+-- Host: localhost:3306
+-- Generation Time: Aug 12, 2026 at 01:22 PM
+-- Server version: 8.4.3
+-- PHP Version: 8.3.30
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `dgda`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `users`
+--
+
+CREATE TABLE `users` (
+  `id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `mobile` bigint DEFAULT NULL,
+  `email_verified_at` timestamp NULL DEFAULT NULL,
+  `password` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `profile_photo_path` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `organization_id` bigint UNSIGNED DEFAULT NULL,
+  `designation_id` bigint UNSIGNED DEFAULT NULL,
+  `division_id` bigint UNSIGNED DEFAULT NULL,
+  `district_id` bigint UNSIGNED DEFAULT NULL,
+  `upazila_id` bigint UNSIGNED DEFAULT NULL,
+  `company_id` bigint UNSIGNED DEFAULT NULL,
+  `user_type` enum('admin','staff','applicant') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'applicant',
+  `status` enum('active','inactive','suspended','pending') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `is_payment` enum('0','1') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
+  `is_review` enum('0','1') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '0',
+  `two_factor_secret` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `two_factor_recovery_codes` text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+  `two_factor_confirmed_at` timestamp NULL DEFAULT NULL,
+  `last_login_at` timestamp NULL DEFAULT NULL,
+  `last_login_ip` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_by` bigint UNSIGNED DEFAULT NULL,
+  `remember_token` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  `deleted_at` timestamp NULL DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `users`
+--
+
+INSERT INTO `users` (`id`, `name`, `email`, `phone`, `mobile`, `email_verified_at`, `password`, `profile_photo_path`, `organization_id`, `designation_id`, `division_id`, `district_id`, `upazila_id`, `company_id`, `user_type`, `status`, `is_payment`, `is_review`, `two_factor_secret`, `two_factor_recovery_codes`, `two_factor_confirmed_at`, `last_login_at`, `last_login_ip`, `created_by`, `remember_token`, `created_at`, `updated_at`, `deleted_at`) VALUES
+(1, 'System Administrator', 'admin@mdms.test', NULL, NULL, '2026-07-18 02:26:05', '$2y$12$Ql4VHI5QA72izrHE.qweZ.4tZeme5mK8JxlFJ9iwUe7CoZyAF.daW', NULL, NULL, 5, NULL, NULL, NULL, 4, 'admin', 'active', '0', '0', NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2026-07-18 02:26:05', '2026-07-19 11:06:42', NULL),
+(2, 'General Desk', 'gd@mdms-dgda.com', '0170000001', NULL, NULL, '$2y$12$OJddhoqO1YHTRz54oXNCJOC.1bXdUUnmZeijhTBt6iDuPLsc3IvoG', NULL, NULL, 1, NULL, NULL, NULL, 1, 'staff', 'active', '0', '0', NULL, NULL, NULL, NULL, NULL, 1, NULL, '2026-07-18 03:31:48', '2026-07-18 03:47:01', NULL),
+(3, 'Superintendent of Drugs', 'sd@mdms-dgda.com', '0170000002', NULL, NULL, '$2y$12$2tQF0p96GLaR5RDqQdMSCOZ6oM5jGNfDvJomSm90uF5DZlVWO0w3u', NULL, NULL, 2, NULL, NULL, NULL, NULL, 'staff', 'active', '0', '0', NULL, NULL, NULL, NULL, NULL, 1, NULL, '2026-07-18 05:44:35', '2026-07-18 05:44:35', NULL),
+(4, 'Jami', 'ad@mdms-dgda.com', '0170000003', NULL, NULL, '$2y$12$NVWqQBbR45kgV.PV1g1Use/59pSYUUZwn9Tr1b4uLKsCmWjqEiBdm', NULL, NULL, 4, NULL, NULL, NULL, 3, 'staff', 'active', '0', '0', NULL, NULL, NULL, NULL, NULL, 1, NULL, '2026-07-18 05:45:52', '2026-07-18 12:14:40', NULL),
+(5, 'Deputy Director', 'dd@mdms-dgda.com', '0170000004', NULL, NULL, '$2y$12$3/6iRSG1SlZ1NjzGzzOpHe8pL4tS5sM3YuOI2hzNNaDcu7rDaFdza', NULL, NULL, 3, NULL, NULL, NULL, NULL, 'staff', 'active', '0', '0', NULL, NULL, NULL, NULL, NULL, 1, NULL, '2026-07-18 05:46:26', '2026-07-18 05:46:26', NULL),
+(6, 'Abigail Taylor', 'wityza@mailinator.com', '01700000044', NULL, NULL, '$2y$12$3D1fGPyiN0/jDYRS/PMtH.T4gFuV3yrvWeNlB3z6fVzbUC.tlFRBe', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'applicant', 'active', '1', '0', NULL, NULL, NULL, '2026-07-22 00:03:55', '127.0.0.1', NULL, NULL, '2026-07-21 23:50:03', '2026-07-22 00:13:54', NULL),
+(7, 'Shana Nunez', 'neca@mailinator.com', '01745896352', NULL, NULL, '$2y$12$1ZymEoM1pAAJRvFEfKxwSeK4zis68vwu9ZcbX5ZARYwZvVAL/oBWO', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'applicant', 'active', '0', '0', NULL, NULL, NULL, '2026-07-22 00:35:03', '127.0.0.1', NULL, NULL, '2026-07-22 00:34:45', '2026-07-22 00:35:03', NULL),
+(8, 'Anika Sweet', 'jovosiqu@mailinator.com', '01781236237', NULL, NULL, '$2y$12$sx43cbfBPgZrNCKyxT4KkO6EDkCmsLrg2o6Gx74bcymh2.NCXOUAi', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'applicant', 'active', '1', '0', NULL, NULL, NULL, '2026-08-11 22:38:33', '127.0.0.1', NULL, NULL, '2026-07-22 03:53:46', '2026-08-11 22:38:33', NULL),
+(10, 'Front Operator One', 'frontdesk123@mdms-dgda.com', '01915566789', NULL, NULL, '$2y$12$OJddhoqO1YHTRz54oXNCJOC.1bXdUUnmZeijhTBt6iDuPLsc3IvoG', NULL, NULL, 6, NULL, NULL, NULL, 1, 'staff', 'active', '0', '0', NULL, NULL, NULL, NULL, NULL, 1, NULL, '2026-07-30 11:09:22', '2026-07-30 11:09:22', NULL);
+
+--
+-- Indexes for dumped tables
+--
+
+--
+-- Indexes for table `users`
+--
+ALTER TABLE `users`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `users_email_unique` (`email`),
+  ADD UNIQUE KEY `users_phone_unique` (`phone`),
+  ADD KEY `users_organization_id_foreign` (`organization_id`),
+  ADD KEY `users_designation_id_foreign` (`designation_id`),
+  ADD KEY `users_division_id_foreign` (`division_id`),
+  ADD KEY `users_district_id_foreign` (`district_id`),
+  ADD KEY `users_upazila_id_foreign` (`upazila_id`),
+  ADD KEY `users_company_id_foreign` (`company_id`);
+
+--
+-- AUTO_INCREMENT for dumped tables
+--
+
+--
+-- AUTO_INCREMENT for table `users`
+--
+ALTER TABLE `users`
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+
+--
+-- Constraints for dumped tables
+--
+
+--
+-- Constraints for table `users`
+--
+ALTER TABLE `users`
+  ADD CONSTRAINT `users_company_id_foreign` FOREIGN KEY (`company_id`) REFERENCES `companies` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `users_designation_id_foreign` FOREIGN KEY (`designation_id`) REFERENCES `designations` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `users_district_id_foreign` FOREIGN KEY (`district_id`) REFERENCES `districts` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `users_division_id_foreign` FOREIGN KEY (`division_id`) REFERENCES `divisions` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `users_organization_id_foreign` FOREIGN KEY (`organization_id`) REFERENCES `organizations` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `users_upazila_id_foreign` FOREIGN KEY (`upazila_id`) REFERENCES `upazilas` (`id`) ON DELETE SET NULL;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
