@@ -109,8 +109,8 @@
                     <span>
                         @if ($application->applicant_id === auth()->id())
                             আপনি নিজের জমা দেওয়া আবেদনে অ্যাকশন নিতে পারবেন না।
-                        @elseif($application->logs->contains('acted_by', auth()->id()))
-                            আপনি এই আবেদনে আগের কোনো ধাপে ইতিমধ্যে কাজ করেছেন — একই আবেদনে দুইবার রিভিউ করা যায় না।
+                        {{-- @elseif($application->logs->contains('acted_by', auth()->id()))
+                            আপনি এই আবেদনে আগের কোনো ধাপে ইতিমধ্যে কাজ করেছেন — একই আবেদনে দুইবার রিভিউ করা যায় না। --}}
                         @elseif($application->assigned_to && $application->assigned_to !== auth()->id())
                             এই আবেদনটি নির্দিষ্টভাবে <strong>{{ $application->assignedTo->name }}</strong>-কে বরাদ্দ করা
                             হয়েছে।
@@ -124,57 +124,59 @@
             @endif
         @endunless
 
+        <div class="grid grid-cols-1 lg:grid-cols-1 gap-6 mb-4">
+            {{-- Workflow stepper --}}
+            <div class="bg-white rounded-none border border-slate-200 shadow-sm p-6">
+                <p class="text-sm font-semibold text-slate-800 mb-5">ওয়ার্কফ্লো অগ্রগতি</p>
+                <div class="flex items-start">
+                    @foreach ($application->workflowConfig->steps as $step)
+                        @php
+                            $isCurrent = $application->current_step_id === $step->id;
+                            $isPast =
+                                $step->step_order < ($application->currentStep->step_order ?? 999) ||
+                                $application->status === 'approved';
+                            $isDone = $isPast && !$isCurrent;
+                        @endphp
+                        <div class="flex-1 flex flex-col items-center relative">
+                            @if (!$loop->first)
+                                <div class="absolute top-4 right-1/2 w-full h-0.5 {{ $isDone || $isCurrent ? 'bg-emerald-500' : 'bg-slate-200' }}"
+                                    style="right: 50%; width: 100%;"></div>
+                            @endif
+                            <div
+                                class="relative z-10 h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0
+                                    {{ $isDone ? 'bg-emerald-500 text-white' : ($isCurrent ? 'bg-ink-900 text-white ring-4 ring-ink-900/15' : 'bg-slate-100 text-slate-400 border-2 border-slate-200') }}">
+                                @if ($isDone)
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                @else
+                                    {{ $loop->iteration }}
+                                @endif
+                            </div>
+                            <p
+                                class="text-[11px] font-medium mt-2 text-center {{ $isCurrent ? 'text-slate-800' : 'text-slate-400' }}">
+                                {{ $step->step_name }}</p>
+                            <p class="text-[10px] text-slate-400">{{ $step->designation->short_code }}</p>
+                        </div>
+                    @endforeach
+                </div>
+                @if ($application->assigned_to && in_array($application->status, ['submitted', 'in_review']))
+                    <div class="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-500">
+                        <div
+                            class="h-6 w-6 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-[10px] font-semibold">
+                            {{ strtoupper(substr($application->assignedTo->name, 0, 1)) }}</div>
+                        <span>নির্দিষ্টভাবে বরাদ্দকৃত: <strong
+                                class="text-slate-700">{{ $application->assignedTo->name }}</strong></span>
+                    </div>
+                @endif
+            </div>
+        </div>
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
             {{-- Main column --}}
             <div class="lg:col-span-2 space-y-6">
 
-                {{-- Workflow stepper --}}
-                <div class="bg-white rounded-none border border-slate-200 shadow-sm p-6">
-                    <p class="text-sm font-semibold text-slate-800 mb-5">ওয়ার্কফ্লো অগ্রগতি</p>
-                    <div class="flex items-start">
-                        @foreach ($application->workflowConfig->steps as $step)
-                            @php
-                                $isCurrent = $application->current_step_id === $step->id;
-                                $isPast =
-                                    $step->step_order < ($application->currentStep->step_order ?? 999) ||
-                                    $application->status === 'approved';
-                                $isDone = $isPast && !$isCurrent;
-                            @endphp
-                            <div class="flex-1 flex flex-col items-center relative">
-                                @if (!$loop->first)
-                                    <div class="absolute top-4 right-1/2 w-full h-0.5 {{ $isDone || $isCurrent ? 'bg-emerald-500' : 'bg-slate-200' }}"
-                                        style="right: 50%; width: 100%;"></div>
-                                @endif
-                                <div
-                                    class="relative z-10 h-8 w-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0
-                                        {{ $isDone ? 'bg-emerald-500 text-white' : ($isCurrent ? 'bg-ink-900 text-white ring-4 ring-ink-900/15' : 'bg-slate-100 text-slate-400 border-2 border-slate-200') }}">
-                                    @if ($isDone)
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="3"
-                                            viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                                        </svg>
-                                    @else
-                                        {{ $loop->iteration }}
-                                    @endif
-                                </div>
-                                <p
-                                    class="text-[11px] font-medium mt-2 text-center {{ $isCurrent ? 'text-slate-800' : 'text-slate-400' }}">
-                                    {{ $step->step_name }}</p>
-                                <p class="text-[10px] text-slate-400">{{ $step->designation->short_code }}</p>
-                            </div>
-                        @endforeach
-                    </div>
-                    @if ($application->assigned_to && in_array($application->status, ['submitted', 'in_review']))
-                        <div class="mt-4 pt-4 border-t border-slate-100 flex items-center gap-2 text-xs text-slate-500">
-                            <div
-                                class="h-6 w-6 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center text-[10px] font-semibold">
-                                {{ strtoupper(substr($application->assignedTo->name, 0, 1)) }}</div>
-                            <span>নির্দিষ্টভাবে বরাদ্দকৃত: <strong
-                                    class="text-slate-700">{{ $application->assignedTo->name }}</strong></span>
-                        </div>
-                    @endif
-                </div>
 
                 {{-- Full entity details --}}
                 @include('applications._entity-details')
@@ -182,7 +184,7 @@
                 @if ($packageApplication)
                     {{-- Packaging application details --}}
                     @include('applications._packaging-details', ['packageApplication' => $packageApplication])
-                    
+
                 @endif
 
                 {{-- History timeline --}}

@@ -41,6 +41,7 @@ class Bengali
         'establishment' => 'এস্টাবলিশমেন্ট',
         'device' => 'ডিভাইস',
         'mrp' => 'এমআরপি',
+        'service' => 'সার্ভিস এপ্লিকেশন',
 
         // workflow step action_type
         'review' => 'পর্যালোচনা',

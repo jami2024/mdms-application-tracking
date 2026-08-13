@@ -110,23 +110,23 @@
 
                 <div>
                     <p class="px-3 mb-2 text-[16px] font-semibold uppercase tracking-widest text-slate-500">নিবন্ধন</p>
-                    {!! $link(route('companies.index'), 'প্রতিষ্ঠান', 'building', request()->routeIs('companies.*')) !!}
-                    {!! $link('#', 'এস্টাবলিশমেন্ট', 'doc', false) !!}
-                    {!! $link('#', 'মেডিকেল ডিভাইস', 'device', false) !!}
-                    {!! $link(route('devices.packages.applications'), 'ডিভাইস প্যাকেজ আবেদন', 'bag', false, request()->routeIs('devices.packages.applications')) !!}
-                    {!! $link(route('devices.final-packages.applications'), 'ফাইনাল প্যাকেজ আবেদন', 'bag', false, request()->routeIs('devices.final-packages.applications')) !!}
-                    {!! $link('#', 'এমআরপি আবেদন', 'coins', false) !!}
+                    {{-- {!! $link(route('companies.index'), 'প্রতিষ্ঠান', 'building', request()->routeIs('companies.*')) !!} --}}
+                    {{-- {!! $link('#', 'এস্টাবলিশমেন্ট', 'doc', false) !!} --}}
+                    {{-- {!! $link('#', 'মেডিকেল ডিভাইস', 'device', false) !!} --}}
+                    {{-- {!! $link(route('devices.packages.applications'), 'ডিভাইস প্যাকেজ আবেদন', 'bag', false, request()->routeIs('devices.packages.applications')) !!} --}}
+                    {{-- {!! $link(route('devices.final-packages.applications'), 'ফাইনাল প্যাকেজ আবেদন', 'bag', false, request()->routeIs('devices.final-packages.applications')) !!} --}}
+                    {{-- {!! $link('#', 'এমআরপি আবেদন', 'coins', false) !!} --}}
                     {!! $link(route('services.add-new'), 'সার্ভিস আবেদন', 'wallet', request()->routeIs('services.add-new')) !!}
                     {!! $link(route('services.application-track'), 'সার্ভিস আবেদন ট্র্যাক', 'wallet', request()->routeIs('services.application-track')) !!}
                 </div>
 
                 <div>
                     <p class="px-3 mb-2 text-[16px] font-semibold uppercase tracking-widest text-slate-500">অর্থ ও ডকুমেন্ট</p>
-                    {!! $link(route('payments.index'), 'পেমেন্ট', 'wallet', request()->routeIs('payments.*')) !!}
-                    {!! $link('#', 'সার্টিফিকেট', 'award', false) !!}
+                    {{-- {!! $link(route('payments.index'), 'পেমেন্ট', 'wallet', request()->routeIs('payments.*')) !!} --}}
+                    {{-- {!! $link('#', 'সার্টিফিকেট', 'award', false) !!} --}}
                     {!! $link(route('reports.applications'), 'আবেদন প্রতিবেদন', 'chart', request()->routeIs('reports.applications*')) !!}
-                    {!! $link(route('reports.revenue'), 'রাজস্ব প্রতিবেদন', 'chart', request()->routeIs('reports.revenue*')) !!}
-                    {!! $link(route('reports.renewals'), 'নবায়ন প্রতিবেদন', 'chart', request()->routeIs('reports.renewals*')) !!}
+                    {{-- {!! $link(route('reports.revenue'), 'রাজস্ব প্রতিবেদন', 'chart', request()->routeIs('reports.revenue*')) !!} --}}
+                    {{-- {!! $link(route('reports.renewals'), 'নবায়ন প্রতিবেদন', 'chart', request()->routeIs('reports.renewals*')) !!} --}}
                 </div>
 
                 @role('Admin')
@@ -250,7 +250,7 @@
                 </div>
             </header>
 
-            <main class="flex-1 p-4 lg:p-8">
+            <main class="flex-1 p-2 lg:p-4">
                 @if (session('status'))
                     <div class="mb-4 rounded-xl bg-emerald-50 text-emerald-700 text-sm px-4 py-3 border border-emerald-100">{{ session('status') }}</div>
                 @endif

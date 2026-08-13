@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Application;
 use App\Models\ServiceApplication;
+use App\Models\WorkflowConfig;
 use App\Support\PdfGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -15,7 +16,8 @@ class ServiceController extends Controller
 {
     public function index(Request $request)
     {
-        return view('service.add_new');
+        $configData = WorkflowConfig::get();
+        return view('service.add_new')->with('configData');
     }
 
     public function applicationNewStore(Request $request){
@@ -77,19 +79,23 @@ class ServiceController extends Controller
         //     ->withProperties($validatedData)
         //     ->log('New service application submitted');
 
+        $applicationId = null;
+
         try {
             // Save the validated data to the database
             $lastId = ServiceApplication::insertGetId($validatedData);
 
+            $applicationId = 'APP-SERVICE-' . str_pad($lastId, 6, '0', STR_PAD_LEFT);
+
             // Create WF Application Instance
             $application = new Application();
-            $application->application_no = 'APP-SERVICE-' . str_pad($lastId, 6, '0', STR_PAD_LEFT);
+            $application->application_no = $applicationId;
             $application->applicable_type = ServiceApplication::class;
             $application->applicable_id = $lastId;
             $application->workflow_config_id = 1; // Assuming workflow_config_id is 1
-            $application->current_step_id = 1; // Assuming current_step_id is 1
-            $application->assigned_to = null; // Assuming assigned_to is null initially
-            $application->applicant_id = Auth::user()->id; // Assuming the applicant is the currently authenticated user
+            $application->current_step_id = 29; // Assuming current_step_id is 1
+            $application->assigned_to = 10; // Assuming assigned_to is null initially
+            $application->applicant_id = 6; // Auth::user()->id; Assuming the applicant is the currently authenticated user
             $application->status = 'submitted'; // Assuming status is 'submitted' initially
             $application->submitted_at = now();
             $application->save();
@@ -101,7 +107,11 @@ class ServiceController extends Controller
                 ->withInput();
         }
 
-        return redirect()->route('services.add-new')->with('success_message', 'সার্ভিস আবেদন সফলভাবে জমা দেওয়া হয়েছে। আপনার আবেদন নম্বর: ' . $application->application_no);
+        return redirect()->route('services.add-new')->with([
+            'success_message'=> 'সার্ভিস আবেদন সফলভাবে জমা দেওয়া হয়েছে। আপনার আবেদন নম্বর: ' . $application->application_no,
+            'application_id' => $applicationId,
+            'application_data' => $validatedData
+        ]);
     }
 
     public function applicationTrack(Request $request)

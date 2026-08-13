@@ -53,7 +53,7 @@ class ApplicationController extends Controller
                     });
             })
 
-            ->where('applicant_id', '!=', $user->id)
+            // ->where('applicant_id', '=', $user->id)
 
             ->whereDoesntHave(
                 'logs',
@@ -94,6 +94,8 @@ class ApplicationController extends Controller
             ->latest()
             ->paginate(15)
             ->withQueryString();
+
+        // dd($applications, $user);
 
 
         // Available modules
@@ -469,11 +471,11 @@ class ApplicationController extends Controller
 
         abort_if($application->applicant_id === $user->id, 403, 'আপনি নিজের জমা দেওয়া আবেদনে অ্যাকশন নিতে পারবেন না।');
 
-        abort_if(
-            $application->logs()->where('acted_by', $user->id)->exists(),
-            403,
-            'আপনি এই আবেদনে আগের কোনো ধাপে ইতিমধ্যে কাজ করেছেন — একই আবেদনে দুইবার রিভিউ করা যায় না।'
-        );
+        // abort_if(
+        //     $application->logs()->where('acted_by', $user->id)->exists(),
+        //     403,
+        //     'আপনি এই আবেদনে আগের কোনো ধাপে ইতিমধ্যে কাজ করেছেন — একই আবেদনে দুইবার রিভিউ করা যায় না।'
+        // );
 
         if ($user->hasRole('Admin')) {
             return;
