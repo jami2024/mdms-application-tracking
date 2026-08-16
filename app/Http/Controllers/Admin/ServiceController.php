@@ -22,6 +22,7 @@ class ServiceController extends Controller
 
     public function applicationNewStore(Request $request){
 
+        // dd($request->all());
         // "applicant_name" => "Stacey Larsen"
         // "mobile_number" => "3447555942"
         // "email" => "qybati@gmail.com"
@@ -37,28 +38,8 @@ class ServiceController extends Controller
             'applicant_name' => 'required|string|max:100',
             'mobile_number' => ['required', 'regex:/^01[1-9][0-9]{8}$/'],
             'email' => 'nullable|email|max:100',
-            'nid' => [
-                'required',
-                'digits_between:10,17',
-                function ($attribute, $value, $fail) {
-                    if (! in_array(strlen($value), [10, 17])) {
-                        $fail('এনআইডি নম্বর অবশ্যই ১০ অথবা ১৭ সংখ্যার হতে হবে।');
-                    }
-                },
-            ],
             'company_name' => 'required|string|max:100',
             'designation' => 'required|string|max:50',
-            'tin' => [
-                'required',
-                'digits_between:10,17',
-                function ($attribute, $value, $fail) {
-                    if (! in_array(strlen($value), [10, 17])) {
-                        $fail('টিআইএন নম্বর অবশ্যই ১০ অথবা ১৭ সংখ্যার হতে হবে।');
-                    }
-                },
-            ],
-            'document_type' => 'required|string|max:50',
-            'document_number' => 'required|string|max:100',
             'remarks' => 'nullable|string|max:255',
         ]);
 

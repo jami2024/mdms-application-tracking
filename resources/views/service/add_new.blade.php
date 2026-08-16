@@ -17,6 +17,17 @@
         box-shadow: 0 0 0 3px rgba(251, 113, 133, 0.15);
     }
 
+    kbd {
+        font-family: ui-monospace, monospace;
+        font-size: 10px;
+        line-height: 1;
+        padding: 2px 5px;
+        border-radius: 4px;
+        border: 1px solid #cbd5e1;
+        background: #f8fafc;
+        color: #64748b;
+    }
+
     /* ---- Print / PDF receipt ---- */
     @media print {
         body * { visibility: hidden; }
@@ -26,18 +37,9 @@
     }
 </style>
 
-<div id="applicant-page" class="w-full max-w-5xl mx-auto px-4">
+<div id="applicant-page" class="flex flex-col w-full max-w-2xl mx-auto px-4">
 
     @php
-        $documentTypes = [
-            'nid'               => 'জাতীয় পরিচয়পত্র (এনআইডি)',
-            'passport'          => 'পাসপোর্ট',
-            'trade_license'     => 'ট্রেড লাইসেন্স',
-            'driving_license'   => 'ড্রাইভিং লাইসেন্স',
-            'birth_certificate' => 'জন্ম নিবন্ধন সনদ',
-            'other'             => 'অন্যান্য',
-        ];
-
         $serviceTypes = [
             '1' => 'অনুমোদিত নতুন প্রকল্পের মেয়াদ বৃদ্ধির আবেদন',
             '2' => 'ঔষধ উৎপাদনের জন্য নতুন প্রকল্প অনুমোদনের আবেদন',
@@ -48,8 +50,8 @@
         //   session('success_message', 'আবেদন সফলভাবে জমা হয়েছে।');
         //   session('application_id', $application->tracking_no);   // any unique reference
         //   session('application_data', $request->only([
-        //       'applicant_name','mobile_number','nid','email','company_name',
-        //       'designation','tin','service_type','document_type','document_number','remarks'
+        //       'applicant_name','mobile_number','email','company_name',
+        //       'designation','service_type'
         //   ]));
         $receipt = session('application_data');
         $receiptId = session('application_id', now()->format('ymdHis'));
@@ -57,73 +59,77 @@
     @endphp
 
     {{-- Everything below is hidden during printing so only the receipt (if triggered) prints --}}
-    <div id="page-content">
+    <div id="page-content" class="col">
 
-    {{-- Page Header --}}
-    <div class="flex items-center gap-3 mb-4">
-        <div class="p-2.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 shrink-0">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-            </svg>
-        </div>
-        <div>
-            <h1 class="text-lg font-bold text-slate-800 tracking-tight">ফ্রন্ট ডেস্ক — আবেদনকারীর তথ্য সংগ্রহ</h1>
-            <p class="text-xs text-slate-500">সংশ্লিষ্ট ডেস্কে প্রেরণের পূর্বে সরাসরি আগত আবেদনকারীর তথ্য সংরক্ষণ করুন।</p>
-        </div>
-    </div>
-
-    {{-- Alert Messages --}}
-    @if (session('success_message'))
-        <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg px-3.5 py-3 text-xs">
-            <div class="flex items-center gap-2">
-                <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                <span>{{ session('success_message') }}</span>
+        {{-- Page Header --}}
+        <div class="flex items-center gap-3 mb-4">
+            <div class="p-2.5 bg-emerald-50 text-emerald-700 rounded-lg border border-emerald-100 shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
             </div>
-            @if ($receipt)
-                <div class="mt-2.5 pt-2.5 border-t border-emerald-200/70 flex items-center justify-between gap-3">
-                    <span class="text-emerald-700">ট্র্যাকিং নম্বর: <strong>{{ $receiptId }}</strong></span>
-                    <button type="button" onclick="downloadReceipt()"
-                            class="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 rounded-lg shadow-sm transition shrink-0">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H8a2 2 0 01-2-2V5a2 2 0 012-2h6l6 6v11a2 2 0 01-2 2z"/></svg>
-                        রশিদ ডাউনলোড করুন (PDF)
-                    </button>
+            <div>
+                <h1 class="text-lg font-bold text-slate-800 tracking-tight">ফ্রন্ট ডেস্ক — আবেদনকারীর তথ্য সংগ্রহ</h1>
+                <p class="text-xs text-slate-500">সংশ্লিষ্ট ডেস্কে প্রেরণের পূর্বে সরাসরি আগত আবেদনকারীর তথ্য সংরক্ষণ করুন।</p>
+            </div>
+        </div>
+
+        {{-- Alert Messages --}}
+        @if (session('success_message'))
+            <div class="mb-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg px-3.5 py-3 text-xs">
+                <div class="flex items-center gap-2">
+                    <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                    <span>{{ session('success_message') }}</span>
                 </div>
-            @endif
-        </div>
-    @endif
-
-    @if (session('error_message'))
-        <div class="mb-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg px-3.5 py-2.5 flex items-center gap-2 text-xs">
-            <svg class="w-4 h-4 shrink-0 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
-            <span>{{ session('error_message') }}</span>
-        </div>
-    @endif
-
-    {{-- Main Form Card --}}
-    <form method="POST"
-          id="applicant-form"
-          novalidate
-          action="{{ route('services.applicationNewStore')}}"
-          enctype="multipart/form-data"
-          class="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-5 sm:px-6 sm:py-6 space-y-5">
-        @csrf
-
-        {{-- Section 1: Applicant Identity --}}
-        <div>
-            <div class="flex items-center gap-2 pb-1.5 mb-3 border-b border-slate-100">
-                <span class="w-1.5 h-3.5 bg-emerald-600 rounded-full"></span>
-                <h2 class="text-sm font-semibold text-slate-800">আবেদনকারীর পরিচিতি</h2>
+                @if ($receipt)
+                    <div class="mt-2.5 pt-2.5 border-t border-emerald-200/70 flex items-center justify-between gap-3">
+                        <span class="text-emerald-700">ট্র্যাকিং নম্বর: <strong>{{ $receiptId }}</strong></span>
+                        <button type="button" onclick="downloadReceipt()"
+                                class="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 rounded-lg shadow-sm transition shrink-0">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H8a2 2 0 01-2-2V5a2 2 0 012-2h6l6 6v11a2 2 0 01-2 2z"/></svg>
+                            রশিদ ডাউনলোড করুন (PDF)
+                        </button>
+                    </div>
+                @endif
             </div>
+        @endif
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <div class="sm:col-span-2 lg:col-span-1">
+        @if (session('error_message'))
+            <div class="mb-4 bg-rose-50 border border-rose-200 text-rose-800 rounded-lg px-3.5 py-2.5 flex items-center gap-2 text-xs">
+                <svg class="w-4 h-4 shrink-0 text-rose-600" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+                <span>{{ session('error_message') }}</span>
+            </div>
+        @endif
+
+        @if ($errors->any())
+            <div class="mt-6 bg-white rounded-xl border-b-red-800 px-6 sm:px-8 py-2 sm:py-2">
+                    @foreach ($errors->all() as $error)
+                        <p class="mt-1 text-sm text-red-900">
+                            <i class="fa fa-info-circle text-red-900"></i> {{ $error }}
+                        </p>
+                    @endforeach
+            </div>
+        @endif
+
+
+        {{-- Main Form Card — one compact block, no heavy sections, built for fast counter entry --}}
+        <form method="POST"
+            id="applicant-form"
+            novalidate
+            action="{{ route('services.applicationNewStore')}}"
+            class="bg-white rounded-xl border border-slate-200 shadow-sm px-4 py-5 sm:px-6 sm:py-6">
+            @csrf
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                <div class="sm:col-span-2">
                     <label class="block text-xs font-semibold text-slate-700 mb-1" for="applicant_name">
                         আবেদনকারীর নাম <span class="text-rose-500">*</span>
                     </label>
-                    <input id="applicant_name" name="applicant_name" type="text" required
-                           class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
-                           placeholder="এনআইডি অনুযায়ী পূর্ণ নাম"
-                           value="{{ old('applicant_name') }}">
+                    <input id="applicant_name" name="applicant_name" type="text" required autofocus
+                        class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
+                        placeholder="পূর্ণ নাম লিখুন"
+                        value="{{ old('applicant_name') }}">
                     <p class="hidden text-rose-500 text-xs mt-1" id="err_applicant_name"></p>
                     @error('applicant_name') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
@@ -133,87 +139,51 @@
                         মোবাইল নম্বর <span class="text-rose-500">*</span>
                     </label>
                     <input id="mobile_number" name="mobile_number" type="text" inputmode="numeric" required
-                           class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
-                           placeholder="উদাহরণ: ০১৭১২৪৫৬৭৮৯"
-                           value="{{ old('mobile_number') }}">
+                        class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
+                        placeholder="০১৭XXXXXXXX"
+                        value="{{ old('mobile_number') }}">
                     <p class="hidden text-rose-500 text-xs mt-1" id="err_mobile_number"></p>
                     @error('mobile_number') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="nid">
-                        জাতীয় পরিচয়পত্র (এনআইডি) নম্বর <span class="text-rose-500">*</span>
-                    </label>
-                    <input id="nid" name="nid" type="text" inputmode="numeric" required
-                           class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
-                           placeholder="উদাহরণ: ১২৩৪৫৬৭৮৯০১২৩"
-                           value="{{ old('nid') }}">
-                    <p class="hidden text-rose-500 text-xs mt-1" id="err_nid"></p>
-                    @error('nid') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div>
-
-                <div class="sm:col-span-2 lg:col-span-3">
                     <label class="block text-xs font-semibold text-slate-700 mb-1" for="email">
-                        ইমেইল ঠিকানা <span class="text-slate-400 font-normal">(ঐচ্ছিক)</span>
+                        ইমেইল <span class="text-slate-400 font-normal">(ঐচ্ছিক)</span>
                     </label>
                     <input id="email" name="email" type="email"
-                           class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
-                           placeholder="name@example.com"
-                           value="{{ old('email') }}">
+                        class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
+                        placeholder="name@example.com"
+                        value="{{ old('email') }}">
                     <p class="hidden text-rose-500 text-xs mt-1" id="err_email"></p>
                     @error('email') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
-            </div>
-        </div>
 
-        {{-- Section 2: Organization Details --}}
-        <div>
-            <div class="flex items-center gap-2 pb-1.5 mb-3 border-b border-slate-100">
-                <span class="w-1.5 h-3.5 bg-emerald-600 rounded-full"></span>
-                <h2 class="text-sm font-semibold text-slate-800">প্রতিষ্ঠানের তথ্য</h2>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="company_name">প্রতিষ্ঠানের নাম</label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="company_name">
+                        প্রতিষ্ঠানের নাম <span class="text-slate-400 font-normal">(ঐচ্ছিক)</span>
+                    </label>
                     <input id="company_name" name="company_name" type="text"
-                           class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
-                           placeholder="উদাহরণ: বেক্সিমকো মেডিকেল লিমিটেড"
-                           value="{{ old('company_name') }}">
+                        class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
+                        placeholder="উদাহরণ: বেক্সিমকো মেডিকেল লিমিটেড"
+                        value="{{ old('company_name') }}">
                     @error('company_name') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
                 <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="designation">পদবি</label>
+                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="designation">
+                        পদবি <span class="text-slate-400 font-normal">(ঐচ্ছিক)</span>
+                    </label>
                     <input id="designation" name="designation" type="text"
-                           class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
-                           placeholder="উদাহরণ: ম্যানেজার"
-                           value="{{ old('designation') }}">
+                        class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
+                        placeholder="উদাহরণ: ম্যানেজার"
+                        value="{{ old('designation') }}">
                     @error('designation') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="tin">টিআইএন (TIN)</label>
-                    <input id="tin" name="tin" type="text" inputmode="numeric"
-                           class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
-                           placeholder="করদাতা শনাক্তকরণ নম্বর"
-                           value="{{ old('tin') }}">
-                    @error('tin') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div>
-            </div>
-        </div>
-
-        {{-- Section 3: Document Verification --}}
-        <div>
-            <div class="flex items-center gap-2 pb-1.5 mb-3 border-b border-slate-100">
-                <span class="w-1.5 h-3.5 bg-emerald-600 rounded-full"></span>
-                <h2 class="text-sm font-semibold text-slate-800">সার্ভিস ও কাগজপত্র যাচাই</h2>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div class="sm:col-span-2">
                     <label class="block text-xs font-semibold text-slate-700 mb-1" for="service_type">
                         সার্ভিস ধরন <span class="text-rose-500">*</span>
+                        <span class="text-slate-400 font-normal">(দ্রুত নির্বাচনের জন্য 1, 2, 3 চাপুন)</span>
                     </label>
                     <select id="service_type" name="service_type" required
                             class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800">
@@ -225,111 +195,52 @@
                     <p class="hidden text-rose-500 text-xs mt-1" id="err_service_type"></p>
                     @error('service_type') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
+            </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="document_type">
-                        কাগজপত্রের ধরন <span class="text-rose-500">*</span>
-                    </label>
-                    <select id="document_type" name="document_type" required
-                            class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800">
-                        <option value="" disabled selected>নির্বাচন করুন</option>
-                        @foreach ($documentTypes as $value => $label)
-                            <option value="{{ $value }}" @selected(old('document_type') === $value)>{{ $label }}</option>
-                        @endforeach
-                    </select>
-                    <p class="hidden text-rose-500 text-xs mt-1" id="err_document_type"></p>
-                    @error('document_type') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div>
+            {{-- Actions Toolbar --}}
+            <div class="pt-4 mt-4 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-center justify-end gap-2.5">
+                <button type="reset" onclick="clearAllErrors()"
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-semibold text-slate-600 border border-slate-300 shadow-sm px-4 py-2 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition">
+                    ফর্ম মুছুন <kbd>Alt R</kbd>
+                </button>
+                <button type="button" onclick="openReviewModal()"
+                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-5 py-2 rounded-lg shadow-sm transition">
+                    সংরক্ষণ করুন <kbd class="border-emerald-400 bg-emerald-700/40 text-emerald-50">Ctrl ⏎</kbd>
+                </button>
+            </div>
 
-                <div>
-                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="document_number">কাগজপত্রের নম্বর</label>
-                    <input id="document_number" name="document_number" type="text"
-                           class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400"
-                           placeholder="কাগজপত্রে মুদ্রিত অনুযায়ী লিখুন"
-                           value="{{ old('document_number') }}">
-                    @error('document_number') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-                </div>
+            {{-- Application Review Modal --}}
+            <div id="review-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeReviewModal()"></div>
 
-                <div class="sm:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-700 mb-1">কাগজপত্রের কপি আপলোড করুন <span class="text-rose-500">*</span></label>
-                    <label for="document_file"
-                           class="flex items-center justify-between gap-3 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50/50 hover:bg-slate-50 px-3.5 py-2.5 cursor-pointer hover:border-emerald-500/60 transition group">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <svg class="w-4 h-4 text-slate-400 group-hover:text-emerald-600 transition shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
-                            <span class="text-xs text-slate-500 truncate" id="document_file_name">পিডিএফ অথবা ছবি, সর্বোচ্চ ১০ এমবি</span>
+                <div class="relative bg-white w-full max-w-sm rounded-xl border border-slate-200 shadow-xl max-h-[85vh] flex flex-col overflow-hidden">
+                    <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2.5">
+                        <div class="p-1.5 bg-amber-100 text-amber-700 rounded-lg shrink-0">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         </div>
-                        <span class="shrink-0 text-xs font-medium text-emerald-700 bg-emerald-50 group-hover:bg-emerald-100 border border-emerald-200/60 rounded-md px-3 py-1.5 transition">
-                            ফাইল বেছে নিন
-                        </span>
-                    </label>
-                    <input id="document_file" name="document_file" type="file" required class="hidden"
-                           accept="application/pdf,image/*"
-                           onchange="document.getElementById('document_file_name').innerText = this.files[0]?.name ?? 'পিডিএফ অথবা ছবি, সর্বোচ্চ ১০ এমবি'; validateField(this);">
-                    <p class="hidden text-rose-500 text-xs mt-1" id="err_document_file"></p>
-                </div>
-            </div>
-        </div>
-
-        {{-- Section 4: Additional Remarks --}}
-        <div>
-            <div class="flex items-center gap-2 pb-1.5 mb-3 border-b border-slate-100">
-                <span class="w-1.5 h-3.5 bg-emerald-600 rounded-full"></span>
-                <h2 class="text-sm font-semibold text-slate-800">অতিরিক্ত তথ্য</h2>
-            </div>
-
-            <div>
-                <label class="block text-xs font-semibold text-slate-700 mb-1" for="remarks">মন্তব্য / অন্যান্য তথ্য</label>
-                <textarea id="remarks" name="remarks" rows="2"
-                          class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800 placeholder:text-slate-400 resize-none"
-                          placeholder="প্রয়োজনীয় যেকোনো অতিরিক্ত তথ্য লিখুন...">{{ old('remarks') }}</textarea>
-                @error('remarks') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
-            </div>
-        </div>
-
-        {{-- Actions Toolbar --}}
-        <div class="pt-3 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-end gap-2.5">
-            <button type="reset" onclick="clearAllErrors()"
-                    class="w-full sm:w-auto text-xs font-semibold text-slate-600 border border-slate-300 shadow-sm px-4 py-2 rounded-lg hover:bg-slate-50 hover:text-slate-800 transition">
-                ফর্ম মুছুন
-            </button>
-            <button type="button" onclick="openReviewModal()"
-                    class="w-full sm:w-auto text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-5 py-2 rounded-lg shadow-sm transition">
-                আবেদনকারীর তথ্য সংরক্ষণ করুন
-            </button>
-        </div>
-
-        {{-- Application Review Modal --}}
-        <div id="review-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div class="absolute inset-0 bg-slate-900/40 backdrop-blur-sm" onclick="closeReviewModal()"></div>
-
-            <div class="relative bg-white w-full max-w-md rounded-xl border border-slate-200 shadow-xl max-h-[85vh] flex flex-col overflow-hidden">
-                <div class="px-4 py-3 bg-slate-50 border-b border-slate-200 flex items-center gap-2.5">
-                    <div class="p-1.5 bg-amber-100 text-amber-700 rounded-lg shrink-0">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        <div>
+                            <h3 class="text-sm font-bold text-slate-800">আবেদন পর্যালোচনা করুন</h3>
+                            <p class="text-xs text-slate-500">তথ্য জমা দেওয়ার আগে একবার ভালো করে যাচাই করে নিন।</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-sm font-bold text-slate-800">আবেদন পর্যালোচনা করুন</h3>
-                        <p class="text-xs text-slate-500">তথ্য জমা দেওয়ার আগে একবার ভালো করে যাচাই করে নিন।</p>
+
+                    <div id="review-modal-body" class="p-4 overflow-y-auto space-y-2 text-xs">
+                        {{-- Populated by JavaScript --}}
+                    </div>
+
+                    <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
+                        <button type="button" onclick="closeReviewModal()"
+                                class="inline-flex items-center gap-2 text-xs font-semibold text-slate-600 border border-slate-300 shadow-sm bg-white px-4 py-1.5 rounded-lg hover:bg-slate-100 transition">
+                            সম্পাদনা করুন <kbd>Esc</kbd>
+                        </button>
+                        <button type="button" onclick="confirmReviewSubmit()"
+                                class="inline-flex items-center gap-2 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-1.5 rounded-lg shadow-sm transition">
+                            নিশ্চিত করুন ও জমা দিন <kbd class="border-emerald-400 bg-emerald-700/40 text-emerald-50">Ctrl ⏎</kbd>
+                        </button>
                     </div>
                 </div>
-
-                <div id="review-modal-body" class="p-4 overflow-y-auto space-y-2 text-xs">
-                    {{-- Populated by JavaScript --}}
-                </div>
-
-                <div class="px-4 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
-                    <button type="button" onclick="closeReviewModal()"
-                            class="text-xs font-semibold text-slate-600 border border-slate-300 shadow-sm bg-white px-4 py-1.5 rounded-lg hover:bg-slate-100 transition">
-                        সম্পাদনা করুন
-                    </button>
-                    <button type="button" onclick="confirmReviewSubmit()"
-                            class="text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-4 py-1.5 rounded-lg shadow-sm transition">
-                        নিশ্চিত করুন ও জমা দিন
-                    </button>
-                </div>
             </div>
-        </div>
-    </form>
+        </form>
 
     </div> {{-- /#page-content --}}
 
@@ -365,17 +276,12 @@
                     <tbody>
                         @php
                             $rows = [
-                                'আবেদনকারীর নাম'        => $receipt['applicant_name'] ?? '—',
-                                'মোবাইল নম্বর'          => $receipt['mobile_number'] ?? '—',
-                                'এনআইডি নম্বর'          => $receipt['nid'] ?? '—',
-                                'ইমেইল'                 => $receipt['email'] ?? '—',
-                                'প্রতিষ্ঠানের নাম'      => $receipt['company_name'] ?? '—',
-                                'পদবি'                  => $receipt['designation'] ?? '—',
-                                'টিআইএন'               => $receipt['tin'] ?? '—',
-                                'সার্ভিস ধরন'           => $serviceTypes[$receipt['service_type'] ?? ''] ?? ($receipt['service_type'] ?? '—'),
-                                'কাগজপত্রের ধরন'        => $documentTypes[$receipt['document_type'] ?? ''] ?? ($receipt['document_type'] ?? '—'),
-                                'কাগজপত্রের নম্বর'      => $receipt['document_number'] ?? '—',
-                                'মন্তব্য'               => $receipt['remarks'] ?? '—',
+                                'আবেদনকারীর নাম'   => $receipt['applicant_name'] ?? '—',
+                                'মোবাইল নম্বর'     => $receipt['mobile_number'] ?? '—',
+                                'ইমেইল'            => $receipt['email'] ?? '—',
+                                'প্রতিষ্ঠানের নাম' => $receipt['company_name'] ?? '—',
+                                'পদবি'             => $receipt['designation'] ?? '—',
+                                'সার্ভিস ধরন'      => $serviceTypes[$receipt['service_type'] ?? ''] ?? ($receipt['service_type'] ?? '—'),
                             ];
                         @endphp
                         @foreach ($rows as $label => $value)
@@ -395,6 +301,7 @@
             </div>
         </div>
     @endif
+
 </div>
 
 <script>
@@ -418,9 +325,11 @@
         if (err) { err.textContent = ''; err.classList.add('hidden'); }
     }
 
+    const REQUIRED_FIELDS = ['applicant_name', 'mobile_number', 'email', 'service_type'];
+    const FOCUS_ORDER = ['applicant_name', 'mobile_number', 'email', 'company_name', 'designation', 'service_type'];
+
     function clearAllErrors() {
-        ['applicant_name','mobile_number','nid','email','service_type','document_type','document_file']
-            .forEach(clearFieldError);
+        REQUIRED_FIELDS.forEach(clearFieldError);
     }
 
     function validateField(el) {
@@ -442,14 +351,6 @@
                 break;
             }
 
-            case 'nid': {
-                const digits = toEnglishDigits(value);
-                [10, 13, 17].includes(digits.length) && /^\d+$/.test(digits)
-                    ? clearFieldError(id)
-                    : setFieldError(id, 'এনআইডি নম্বর ১০, ১৩ অথবা ১৭ ডিজিটের হতে হবে।');
-                break;
-            }
-
             case 'email':
                 (value.trim() === '' || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim()))
                     ? clearFieldError(id)
@@ -459,24 +360,13 @@
             case 'service_type':
                 value ? clearFieldError(id) : setFieldError(id, 'সার্ভিস ধরন নির্বাচন করুন।');
                 break;
-
-            case 'document_type':
-                value ? clearFieldError(id) : setFieldError(id, 'কাগজপত্রের ধরন নির্বাচন করুন।');
-                break;
-
-            case 'document_file':
-                el.files && el.files.length > 0
-                    ? clearFieldError(id)
-                    : setFieldError(id, 'কাগজপত্রের একটি কপি আপলোড করুন।');
-                break;
         }
     }
 
     function validateForm() {
-        const fields = ['applicant_name', 'mobile_number', 'nid', 'email', 'service_type', 'document_type', 'document_file'];
         let firstInvalid = null;
 
-        fields.forEach(id => {
+        REQUIRED_FIELDS.forEach(id => {
             const el = document.getElementById(id);
             if (!el) return;
             validateField(el);
@@ -493,28 +383,76 @@
         return true;
     }
 
-    // live-validate as the user types/selects, so errors clear as soon as they're fixed
+    // ---------- Keyboard shortcuts for fast counter entry ----------
     document.addEventListener('DOMContentLoaded', () => {
-        ['applicant_name', 'mobile_number', 'nid', 'email', 'service_type', 'document_type']
-            .forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => validateField(el));
+        // live-validate as the user types/selects, so errors clear as soon as they're fixed
+        REQUIRED_FIELDS.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => validateField(el));
+        });
+
+        // Enter moves to the next field instead of doing nothing / submitting;
+        // on the last field, Enter opens the review modal.
+        FOCUS_ORDER.forEach((id, index) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.addEventListener('keydown', (e) => {
+                if (e.key !== 'Enter' || e.shiftKey) return;
+                e.preventDefault();
+                const nextId = FOCUS_ORDER[index + 1];
+                if (nextId) {
+                    document.getElementById(nextId)?.focus();
+                } else {
+                    openReviewModal();
+                }
             });
+        });
+
+        // Quick-select service type with 1 / 2 / 3 while it's focused
+        const serviceSelect = document.getElementById('service_type');
+        if (serviceSelect) {
+            serviceSelect.addEventListener('keydown', (e) => {
+                const n = parseInt(e.key, 10);
+                if (n >= 1 && n <= serviceSelect.options.length - 1) {
+                    e.preventDefault();
+                    serviceSelect.selectedIndex = n;
+                    serviceSelect.dispatchEvent(new Event('change'));
+                }
+            });
+        }
+    });
+
+    // Global shortcuts: Ctrl/Cmd+Enter to review & save from anywhere, Esc to close modal, Alt+R to reset
+    document.addEventListener('keydown', (e) => {
+        const modalOpen = !document.getElementById('review-modal').classList.contains('hidden');
+
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            modalOpen ? confirmReviewSubmit() : openReviewModal();
+            return;
+        }
+
+        if (e.key === 'Escape' && modalOpen) {
+            closeReviewModal();
+            return;
+        }
+
+        if (e.altKey && e.key.toLowerCase() === 'r' && !modalOpen) {
+            e.preventDefault();
+            document.getElementById('applicant-form').reset();
+            clearAllErrors();
+            document.getElementById('applicant_name')?.focus();
+        }
     });
 
     // ---------- Review modal ----------
     const reviewFields = {
-        'সার্ভিস ধরন':              'service_type',
-        'আবেদনকারীর নাম':          'applicant_name',
-        'জাতীয় পরিচয়পত্র নম্বর':  'nid',
-        'মোবাইল নম্বর':            'mobile_number',
-        'ইমেইল ঠিকানা':            'email',
-        'প্রতিষ্ঠানের নাম':        'company_name',
-        'পদবি':                    'designation',
-        'টিআইএন':                 'tin',
-        'কাগজপত্রের ধরন':          'document_type',
-        'কাগজপত্রের নম্বর':        'document_number',
-        'মন্তব্য':                 'remarks',
+        'সার্ভিস ধরন':       'service_type',
+        'আবেদনকারীর নাম':   'applicant_name',
+        'মোবাইল নম্বর':     'mobile_number',
+        'ইমেইল ঠিকানা':     'email',
+        'প্রতিষ্ঠানের নাম': 'company_name',
+        'পদবি':             'designation',
     };
 
     function openReviewModal() {
@@ -540,15 +478,6 @@
                 </div>
             `);
         }
-
-        const fileInput = document.getElementById('document_file');
-        const fileName = fileInput?.files[0]?.name ?? 'আপলোড করা হয়নি';
-        body.insertAdjacentHTML('beforeend', `
-            <div class="flex items-start justify-between gap-3 pt-1">
-                <span class="text-slate-500 shrink-0 font-medium">আপলোডকৃত কাগজপত্র</span>
-                <span class="text-slate-800 font-semibold text-right truncate max-w-[200px]">${escapeHtml(fileName)}</span>
-            </div>
-        `);
 
         document.getElementById('review-modal').classList.remove('hidden');
     }
@@ -581,4 +510,3 @@
     });
 </script>
 @endsection
-

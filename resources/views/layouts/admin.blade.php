@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'ড্যাশবোর্ড') · মেডিকেল ডিভাইস ব্যবস্থাপনা সিস্টেম</title>
+    <title>@yield('title', 'ড্যাশবোর্ড') · ট্র্যাকিং ম্যনেজমেন্ট সিস্টেম</title>
     <link rel="canonical" href="http://dgda.gov.bd/"/>
     <link rel="icon" type="image/x-icon" href="/site-assets/images/favicon.ico"/>
     <link rel="shortcut icon" type="image/x-icon" href="/site-assets/images/favicon.ico"/>
@@ -66,7 +66,7 @@
                     </div>
                 </div>
                 <div class="leading-tight">
-                    <p class="text-[14px] font-semibold text-white tracking-wide">মেডিকেল ডিভাইস ব্যবস্থাপনা সিস্টেম</p>
+                    <p class="text-[14px] font-semibold text-white tracking-wide">ট্র্যাকিং ম্যনেজমেন্ট সিস্টেম</p>
                     <p class="text-[16px] text-slate-400 tracking-wider uppercase">ঔষধ প্রশাসন অধিদপ্তর</p>
                 </div>
             </div>
