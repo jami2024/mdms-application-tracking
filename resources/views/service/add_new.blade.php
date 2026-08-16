@@ -46,16 +46,10 @@
             '3' => 'নতুন ঔষধ উৎপাদন লাইসেন্স প্রদানের আবেদন',
         ];
 
-        // The controller should flash these to the session on successful submission:
-        //   session('success_message', 'আবেদন সফলভাবে জমা হয়েছে।');
-        //   session('application_id', $application->tracking_no);   // any unique reference
-        //   session('application_data', $request->only([
-        //       'applicant_name','mobile_number','email','company_name',
-        //       'designation','service_type'
-        //   ]));
         $receipt = session('application_data');
         $receiptId = session('application_id', now()->format('ymdHis'));
         $receiptDate = now()->format('d-m-Y h:i A');
+        $oldServiceTypeOption = session('old_service_id_option');
     @endphp
 
     {{-- Everything below is hidden during printing so only the receipt (if triggered) prints --}}
@@ -181,19 +175,18 @@
                 </div>
 
                 <div class="sm:col-span-2">
-                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="service_type">
+                    <label class="block text-xs font-semibold text-slate-700 mb-1" for="service_id">
                         সার্ভিস ধরন <span class="text-rose-500">*</span>
-                        <span class="text-slate-400 font-normal">(দ্রুত নির্বাচনের জন্য 1, 2, 3 চাপুন)</span>
+                        <span class="text-slate-400 font-normal">(টাইপ করে খুঁজুন)</span>
                     </label>
-                    <select id="service_type" name="service_type" required
-                            class="w-full text-sm rounded-lg border border-slate-300 shadow-sm hover:border-slate-400 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 py-1.5 px-3 text-slate-800">
-                        <option value="" disabled selected>নির্বাচন করুন</option>
-                        @foreach ($serviceTypes as $value => $label)
-                            <option value="{{ $value }}" @selected(old('service_type') === $value)>{{ $label }}</option>
-                        @endforeach
+                    <select id="service_id" name="service_id" required
+                            class="w-full text-sm">
+                        @if ($oldServiceTypeOption)
+                            <option value="{{ $oldServiceTypeOption['id'] }}" selected>{{ $oldServiceTypeOption['text'] }}</option>
+                        @endif
                     </select>
-                    <p class="hidden text-rose-500 text-xs mt-1" id="err_service_type"></p>
-                    @error('service_type') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
+                    <p class="hidden text-rose-500 text-xs mt-1" id="err_service_id"></p>
+                    @error('service_id') <span class="text-rose-500 text-xs mt-1 block">{{ $message }}</span> @enderror
                 </div>
             </div>
 
@@ -263,7 +256,8 @@
                     <img src="https://dgda.gov.bd/site-assets/images/logo.png" alt="বাংলাদেশ সরকার"
                          class="w-12 h-12 object-contain"
                          onerror="this.style.display='none'">
-                    <h2 class="text-lg font-bold text-slate-800">আবেদন গ্রহণের রশিদ</h2>
+                    <h2 class="text-lg font-bold text-slate-800">{{ config('app.app_manage_name') }}</h2>
+                    <p class="text-lg text-slate-800">আবেদন গ্রহণের রশিদ</p>
                     <p class="text-xs text-slate-500">Application Acknowledgement Receipt</p>
                 </div>
 
@@ -277,11 +271,11 @@
                         @php
                             $rows = [
                                 'আবেদনকারীর নাম'   => $receipt['applicant_name'] ?? '—',
-                                'মোবাইল নম্বর'     => $receipt['mobile_number'] ?? '—',
-                                'ইমেইল'            => $receipt['email'] ?? '—',
-                                'প্রতিষ্ঠানের নাম' => $receipt['company_name'] ?? '—',
-                                'পদবি'             => $receipt['designation'] ?? '—',
-                                'সার্ভিস ধরন'      => $serviceTypes[$receipt['service_type'] ?? ''] ?? ($receipt['service_type'] ?? '—'),
+                                'মোবাইল নম্বর'       => $receipt['mobile_number'] ?? '—',
+                                'ইমেইল'             => $receipt['email'] ?? '—',
+                                'প্রতিষ্ঠানের নাম'      => $receipt['company_name'] ?? '—',
+                                'পদবি'              => $receipt['designation'] ?? '—',
+                                'সার্ভিস নাম'         => $receipt['service_name'] ?? $receipt['service_id'] ?? '—',
                             ];
                         @endphp
                         @foreach ($rows as $label => $value)
@@ -325,8 +319,8 @@
         if (err) { err.textContent = ''; err.classList.add('hidden'); }
     }
 
-    const REQUIRED_FIELDS = ['applicant_name', 'mobile_number', 'email', 'service_type'];
-    const FOCUS_ORDER = ['applicant_name', 'mobile_number', 'email', 'company_name', 'designation', 'service_type'];
+    const REQUIRED_FIELDS = ['applicant_name', 'mobile_number', 'email', 'service_id'];
+    const FOCUS_ORDER = ['applicant_name', 'mobile_number', 'email', 'company_name', 'designation', 'service_id'];
 
     function clearAllErrors() {
         REQUIRED_FIELDS.forEach(clearFieldError);
@@ -357,8 +351,8 @@
                     : setFieldError(id, 'সঠিক ইমেইল ঠিকানা লিখুন।');
                 break;
 
-            case 'service_type':
-                value ? clearFieldError(id) : setFieldError(id, 'সার্ভিস ধরন নির্বাচন করুন।');
+            case 'service_id':
+                value ? clearFieldError(id) : setFieldError(id, 'সার্ভিস নাম নির্বাচন করুন।');
                 break;
         }
     }
@@ -383,6 +377,7 @@
         return true;
     }
 
+
     // ---------- Keyboard shortcuts for fast counter entry ----------
     document.addEventListener('DOMContentLoaded', () => {
         // live-validate as the user types/selects, so errors clear as soon as they're fixed
@@ -391,16 +386,18 @@
             if (el) el.addEventListener(el.tagName === 'SELECT' ? 'change' : 'input', () => validateField(el));
         });
 
-        // Enter moves to the next field instead of doing nothing / submitting;
-        // on the last field, Enter opens the review modal.
+        // Enter moves to the next field instead of doing nothing / submitting.
+        // service_id is skipped here — Select2 handles its own Enter behaviour once open.
         FOCUS_ORDER.forEach((id, index) => {
             const el = document.getElementById(id);
-            if (!el) return;
+            if (!el || id === 'service_id') return;
             el.addEventListener('keydown', (e) => {
                 if (e.key !== 'Enter' || e.shiftKey) return;
                 e.preventDefault();
                 const nextId = FOCUS_ORDER[index + 1];
-                if (nextId) {
+                if (nextId === 'service_id') {
+                    $('#service_id').select2('open');
+                } else if (nextId) {
                     document.getElementById(nextId)?.focus();
                 } else {
                     openReviewModal();
@@ -408,18 +405,26 @@
             });
         });
 
-        // Quick-select service type with 1 / 2 / 3 while it's focused
-        const serviceSelect = document.getElementById('service_type');
-        if (serviceSelect) {
-            serviceSelect.addEventListener('keydown', (e) => {
-                const n = parseInt(e.key, 10);
-                if (n >= 1 && n <= serviceSelect.options.length - 1) {
-                    e.preventDefault();
-                    serviceSelect.selectedIndex = n;
-                    serviceSelect.dispatchEvent(new Event('change'));
-                }
-            });
-        }
+        $('#service_id').select2({
+            placeholder: 'নির্বাচন করুন',
+            allowClear: true,
+            width: '100%',
+            minimumInputLength: 0,
+            ajax: {
+                url: "{{ route('services.serviceTypes.search') }}",
+                dataType: 'json',
+                delay: 250,
+                data: params => ({ q: params.term || '', page: params.page || 1 }),
+                processResults: (data, params) => {
+                    params.page = params.page || 1;
+                    return { results: data.results, pagination: { more: data.pagination.more } };
+                },
+                cache: true,
+            },
+        }).on('select2:select', () => {
+            validateField(document.getElementById('service_id'));
+            openReviewModal(); // last field on the form — jump straight to review once chosen
+        });
     });
 
     // Global shortcuts: Ctrl/Cmd+Enter to review & save from anywhere, Esc to close modal, Alt+R to reset
@@ -447,7 +452,7 @@
 
     // ---------- Review modal ----------
     const reviewFields = {
-        'সার্ভিস ধরন':       'service_type',
+        'সার্ভিস নাম':       'service_id',
         'আবেদনকারীর নাম':   'applicant_name',
         'মোবাইল নম্বর':     'mobile_number',
         'ইমেইল ঠিকানা':     'email',

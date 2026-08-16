@@ -13,8 +13,8 @@ class ServiceApplication extends Model
     protected $table = 'service_applications';
 
     protected $fillable = [
-        'applicant_name', 'mobile_number', 'email', 'nid',
-        'company_name', 'designation', 'tin', 'document_type',
-        'document_number', 'document_path', 'remarks', 'created_by', 'status'
+        'applicant_name', 'mobile_number', 'email',
+        'company_name', 'designation', 'service_id',
+        'remarks', 'created_by', 'status'
     ];
 }

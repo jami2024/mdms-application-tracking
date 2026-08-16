@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WorkflowConfig extends Model
 {
-    protected $fillable = ['name', 'module', 'description', 'is_active'];
+    protected $fillable = ['name', 'module', 'service_code', 'description', 'is_active'];
 
     public function steps(): HasMany
     {

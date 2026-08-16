@@ -178,8 +178,9 @@ Route::middleware(['auth',  'active'])->group(function () {
         Route::get('application/track', [ServiceController::class, 'applicationTrack'])->name('application-track');
         // demo package certificate download route for testing purposes. This is not a real certificate, just a sample template with dummy data.
         Route::get('certificates/demo-package', [CertificateController::class, 'generatePackagingDemoCertificate'])->name('certificates.generatePackagingDemoCertificate');
+        Route::get('service-types/search', [ServiceController::class, 'searchServiceTypes'])->name('serviceTypes.search');
     });
-    
+
 
     // All Phase 0-6 modules are now wired up.
 });

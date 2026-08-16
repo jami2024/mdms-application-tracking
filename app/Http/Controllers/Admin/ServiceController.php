@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Spatie\Activitylog\Models\Activity;
+use Illuminate\Http\JsonResponse;
 
 class ServiceController extends Controller
 {
@@ -23,16 +24,6 @@ class ServiceController extends Controller
     public function applicationNewStore(Request $request){
 
         // dd($request->all());
-        // "applicant_name" => "Stacey Larsen"
-        // "mobile_number" => "3447555942"
-        // "email" => "qybati@gmail.com"
-        // "nid" => "74"
-        // "company_name" => "Weeks and Fields Trading"
-        // "designation" => "Facilis commodi aute"
-        // "tin" => "47"
-        // "document_type" => "driving_license"
-        // "document_number" => "9753351246"
-        // "remarks" => "Excepturi magna et q"
 
         $validator = Validator::make($request->all(), [
             'applicant_name' => 'required|string|max:100',
@@ -41,6 +32,7 @@ class ServiceController extends Controller
             'company_name' => 'required|string|max:100',
             'designation' => 'required|string|max:50',
             'remarks' => 'nullable|string|max:255',
+            'service_id' => 'required|integer',
         ]);
 
         if ($validator->fails()) {
@@ -53,6 +45,7 @@ class ServiceController extends Controller
         $validatedData = $validator->validated();
         $validatedData['status'] = 'pending';
         $validatedData['created_by'] = Auth::user()->id;
+        $validatedData['service_id'] = $validatedData['service_id'];
 
         // Log the activity
         // activity()
@@ -62,11 +55,21 @@ class ServiceController extends Controller
 
         $applicationId = null;
 
+        $serviceDescription = WorkflowConfig::where('id', $validatedData['service_id'])->first();
+        if (!$serviceDescription) {
+            return redirect()->back()
+                ->with('error_message', 'Service not found.')
+                ->withInput();
+        }
+
         try {
+
             // Save the validated data to the database
             $lastId = ServiceApplication::insertGetId($validatedData);
 
-            $applicationId = 'APP-SERVICE-' . str_pad($lastId, 6, '0', STR_PAD_LEFT);
+            $middle_code = $serviceDescription->service_code?? 'SERVICE';
+
+            $applicationId = 'APP-' . $middle_code . '-' . str_pad($lastId, 6, '0', STR_PAD_LEFT);
 
             // Create WF Application Instance
             $application = new Application();
@@ -88,6 +91,8 @@ class ServiceController extends Controller
                 ->withInput();
         }
 
+        $validatedData['service_name'] = $serviceDescription->description?? null;
+
         return redirect()->route('services.add-new')->with([
             'success_message'=> 'সার্ভিস আবেদন সফলভাবে জমা দেওয়া হয়েছে। আপনার আবেদন নম্বর: ' . $application->application_no,
             'application_id' => $applicationId,
@@ -105,5 +110,30 @@ class ServiceController extends Controller
         // }
 
         return view('service.example-application-steps-page');
+    }
+
+    public function searchServiceTypes(Request $request): JsonResponse
+    {
+        $perPage = 10;
+
+        $query = WorkflowConfig::query()->where('is_active', true);
+
+        if ($term = trim((string) $request->get('q'))) {
+            $query->where('service_code', 'like', "%{$term}%");
+            $query->orWhere('description', 'like', "%{$term}%");
+        }
+
+        $paginator = $query->orderBy('id')
+            ->paginate($perPage, ['id', 'description', 'service_code'], 'page', $request->get('page', 1));
+
+        return response()->json([
+            'results' => $paginator->getCollection()->map(fn ($s) => [
+                'id'   => $s->id,
+                'text' => $s->service_code . ' - ' . $s->description,
+            ]),
+            'pagination' => [
+                'more' => $paginator->hasMorePages(),
+            ],
+        ]);
     }
 }

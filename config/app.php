@@ -123,4 +123,7 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'app_name_bn' => env('APP_NAME_BN', 'ট্র্যাকিং ম্যানেজমেন্ট সিস্টেম'),
+    'app_manage_name' => env('APP_MANAGE_NAME', 'ঔষধ প্রশাসন অধিদপ্তর'),
+
 ];

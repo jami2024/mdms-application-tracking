@@ -76,7 +76,7 @@
                 </dl>
             @endif
         </div>
-        <p class="text-center text-xs text-slate-500 mt-5">ট্র্যাকিং ম্যনেজমেন্ট সিস্টেম</p>
+        <p class="text-center text-xs text-slate-500 mt-5">{{ config('app.app_name_bn') }}</p>
     </div>
 </body>
 </html>

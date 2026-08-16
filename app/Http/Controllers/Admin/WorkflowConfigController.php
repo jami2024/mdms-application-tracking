@@ -24,11 +24,17 @@ class WorkflowConfigController extends Controller
 
     public function store(Request $request)
     {
+
+        $max_service_code = WorkflowConfig::max('service_code');
+        $service_code = $max_service_code ? $max_service_code + 1 : 301;
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'module' => ['required', 'in:company,establishment,device,mrp,package,final_package_approval'],
+            'module' => ['required', 'in:company,establishment,device,mrp,package,final_package_approval,service'],
             'description' => ['nullable', 'string', 'max:500'],
         ]);
+
+        $data['service_code'] = $service_code;
 
         $config = WorkflowConfig::create([...$data, 'is_active' => true]);
 
@@ -135,5 +141,5 @@ class WorkflowConfigController extends Controller
 
         return back();
     }
-    
+
 }

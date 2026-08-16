@@ -12,7 +12,7 @@
         <div>
             <label class="block text-sm font-medium text-slate-700 mb-1">মডিউল</label>
             <select name="module" required class="w-full rounded-none border border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 outline-none hover:border-slate-400 shadow-sm transition">
-                @foreach(['company'=>'Company Registration','establishment'=>'Establishment License','device'=>'Device Registration', 'package'=>'Package Registration', 'final_package_approval'=>'Final Package Approval','mrp'=>'MRP Application'] as $val => $label)
+                @foreach(['company'=>'Company Registration','establishment'=>'Establishment License','device'=>'Device Registration', 'package'=>'Package Registration', 'final_package_approval'=>'Final Package Approval','mrp'=>'MRP Application', 'service'=>'Service Application Approval'] as $val => $label)
                     <option value="{{ $val }}" @selected(old('module') === $val)>{{ $label }}</option>
                 @endforeach
             </select>

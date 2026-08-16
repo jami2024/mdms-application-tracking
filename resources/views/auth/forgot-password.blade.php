@@ -39,7 +39,7 @@
                 </div>
                 <p class="text-[14px] tracking-[0.25em] text-brand-400 font-semibold uppercase mb-2">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
                 <h1 class="text-2xl font-semibold text-white leading-snug">ঔষধ প্রশাসন অধিদপ্তর</h1>
-                <p class="text-slate-400 text-sm mt-1">ট্র্যাকিং ম্যনেজমেন্ট সিস্টেম</p>
+                <p class="text-slate-400 text-sm mt-1">{{ config('app.app_name_bn') }}</p>
 
                 <div class="mt-10 bg-white/5 border border-white/10 rounded-md p-5 text-left">
                     <svg class="w-6 h-6 text-brand-400 mb-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
@@ -64,7 +64,7 @@
                         </div>
                     </div>
                     <h1 class="text-lg font-semibold text-slate-800">ঔষধ প্রশাসন অধিদপ্তর</h1>
-                    <p class="text-xs text-slate-500">ট্র্যাকিং ম্যনেজমেন্ট সিস্টেম</p>
+                    <p class="text-xs text-slate-500">{{ config('app.app_name_bn') }}</p>
                 </div>
 
                 <div class="mb-7">

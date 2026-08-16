@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'ড্যাশবোর্ড') · ট্র্যাকিং ম্যনেজমেন্ট সিস্টেম</title>
+    <title>@yield('title', 'ড্যাশবোর্ড') · {{ config('app.app_name_bn') }}</title>
     <link rel="canonical" href="http://dgda.gov.bd/"/>
     <link rel="icon" type="image/x-icon" href="/site-assets/images/favicon.ico"/>
     <link rel="shortcut icon" type="image/x-icon" href="/site-assets/images/favicon.ico"/>
@@ -14,7 +14,11 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.3.0/css/all.min.css" integrity="sha512-ApSLB1Pd3/bZN8fWB/RG9YhN/7bd9Hkf3AGaE2mPfebjrxagjuBtx2GcgdqIlJkUzwylBo61r9Xa9NmgBI0swA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
     <link href="https://fonts.maateen.me/kalpurush/font.css" rel="stylesheet">
-    <link href="{{asset('assets/css/custom.css')}}" rel="stylesheet">
+    <link href="{{asset('assets/css/custom.css')}}" rel="stylesheet"><link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+
     <script>
         tailwind.config = {
             theme: {
@@ -66,8 +70,8 @@
                     </div>
                 </div>
                 <div class="leading-tight">
-                    <p class="text-[14px] font-semibold text-white tracking-wide">ট্র্যাকিং ম্যনেজমেন্ট সিস্টেম</p>
-                    <p class="text-[16px] text-slate-400 tracking-wider uppercase">ঔষধ প্রশাসন অধিদপ্তর</p>
+                    <p class="text-[14px] font-semibold text-white tracking-wide">{{ config('app.app_name_bn') }}</p>
+                    <p class="text-[16px] text-slate-400 tracking-wider uppercase">{{ config('app.app_manage_name') }}</p>
                 </div>
             </div>
 
