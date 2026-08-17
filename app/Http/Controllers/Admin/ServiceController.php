@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\SmsController;
 use App\Models\Application;
 use App\Models\ServiceApplication;
 use App\Models\WorkflowConfig;
+use App\Models\WorkflowStep;
 use App\Support\PdfGenerator;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -29,8 +32,8 @@ class ServiceController extends Controller
             'applicant_name' => 'required|string|max:100',
             'mobile_number' => ['required', 'regex:/^01[1-9][0-9]{8}$/'],
             'email' => 'nullable|email|max:100',
-            'company_name' => 'required|string|max:100',
-            'designation' => 'required|string|max:50',
+            'company_name' => 'nullable|string|max:100',
+            'designation' => 'nullable|string|max:50',
             'remarks' => 'nullable|string|max:255',
             'service_id' => 'required|integer',
         ]);
@@ -56,6 +59,8 @@ class ServiceController extends Controller
         $applicationId = null;
 
         $serviceDescription = WorkflowConfig::where('id', $validatedData['service_id'])->first();
+        // $firstStepId = WorkflowStep::where('workflow_config_id', $validatedData['service_id'])->where('step_order', 1)->pluck('id')->first();
+
         if (!$serviceDescription) {
             return redirect()->back()
                 ->with('error_message', 'Service not found.')
@@ -69,20 +74,31 @@ class ServiceController extends Controller
 
             $middle_code = $serviceDescription->service_code?? 'SERVICE';
 
-            $applicationId = 'APP-' . $middle_code . '-' . str_pad($lastId, 6, '0', STR_PAD_LEFT);
+            $applicationId = 'DGDA-' . $middle_code . '-' . str_pad($lastId, 6, '0', STR_PAD_LEFT);
 
             // Create WF Application Instance
             $application = new Application();
             $application->application_no = $applicationId;
             $application->applicable_type = ServiceApplication::class;
             $application->applicable_id = $lastId;
-            $application->workflow_config_id = 1; // Assuming workflow_config_id is 1
-            $application->current_step_id = 29; // Assuming current_step_id is 1
-            $application->assigned_to = 10; // Assuming assigned_to is null initially
+            $application->workflow_config_id = $validatedData['service_id']; // Assuming workflow_config_id is 1
+            $application->current_step_id = null; // Assuming current_step_id is 1
+            $application->assigned_to = null; // Assuming assigned_to is null initially
             $application->applicant_id = 6; // Auth::user()->id; Assuming the applicant is the currently authenticated user
             $application->status = 'submitted'; // Assuming status is 'submitted' initially
             $application->submitted_at = now();
             $application->save();
+
+            // Generate Payment Queue
+            $paymentController = new PaymentController();
+            $payment_data = $paymentController->processPayment($applicationId, $lastId);
+
+            if($payment_data){
+
+                $message = "Welcome to DGDA Services. Your application has been submitted successfully. Please make payment to complete the process. Payment Link: " . $payment_data;
+                $smsController = new SmsController();
+                $smsController->notifyThroughSms($validatedData['mobile_number'], $message);
+            }
 
         } catch (\Exception $e) {
             // Handle any exceptions that occur during the save operation
@@ -96,6 +112,7 @@ class ServiceController extends Controller
         return redirect()->route('services.add-new')->with([
             'success_message'=> 'সার্ভিস আবেদন সফলভাবে জমা দেওয়া হয়েছে। আপনার আবেদন নম্বর: ' . $application->application_no,
             'application_id' => $applicationId,
+            'payment_url' => $payment_data,
             'application_data' => $validatedData
         ]);
     }

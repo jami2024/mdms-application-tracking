@@ -38,21 +38,21 @@
                     </div>
                 </div>
                 <p class="text-[14px] tracking-[0.25em] text-brand-400 font-semibold uppercase mb-2">গণপ্রজাতন্ত্রী বাংলাদেশ সরকার</p>
-                <h1 class="text-2xl font-semibold text-white leading-snug">ঔষধ প্রশাসন অধিদপ্তর</h1>
-                <p class="text-slate-400 text-sm mt-1">সার্ভিস এপ্লিকেশন ব্যবস্থাপনা সিস্টেম</p>
+                <h1 class="text-2xl font-semibold text-white leading-snug">{{ config('app.app_manage_name') }}</h1>
+                <p class="text-slate-400 text-sm mt-1">{{ config('app.app_name_bn') }}</p>
 
                 <div class="mt-10 grid grid-cols-3 gap-4 text-left">
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
                         <svg class="w-5 h-5 text-brand-400 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15a3 3 0 100-6 3 3 0 000 6z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-                        <p class="text-[11px] text-slate-300 leading-snug">দুই-স্তর নিরাপত্তা</p>
+                        <p class="text-[11px] text-slate-300 leading-snug">ওয়ার্কফ্লো ব্যবস্থাপনা</p>
                     </div>
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
                         <svg class="w-5 h-5 text-brand-400 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
-                        <p class="text-[11px] text-slate-300 leading-snug">যাচাইকৃত সার্টিফিকেট</p>
+                        <p class="text-[11px] text-slate-300 leading-snug">সার্ভিস আবেদন</p>
                     </div>
                     <div class="bg-white/5 border border-white/10 rounded-2xl p-4">
                         <svg class="w-5 h-5 text-brand-400 mb-2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V9m6 8V5M4 21h16M4 21V10m16 11V7"/></svg>
-                        <p class="text-[11px] text-slate-300 leading-snug">রিয়েল-টাইম প্রতিবেদন</p>
+                        <p class="text-[11px] text-slate-300 leading-snug">রিয়েল-টাইম ট্র্যাকিং</p>
                     </div>
                 </div>
             </div>
@@ -71,8 +71,8 @@
                             <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 2l7 3v6c0 4.5-3 8.5-7 10-4-1.5-7-5.5-7-10V5l7-3z"/></svg>
                         </div>
                     </div>
-                    <h1 class="text-lg font-semibold text-slate-800">ঔষধ প্রশাসন অধিদপ্তর</h1>
-                    <p class="text-xs text-slate-500">সার্ভিস এপ্লিকেশন ব্যবস্থাপনা সিস্টেম</p>
+                    <h1 class="text-lg font-semibold text-slate-800">{{ config('app.app_manage_name') }}</h1>
+                    <p class="text-xs text-slate-500">{{ config('app.app_name_bn') }}</p>
                 </div>
 
                 <div class="mb-7 hidden lg:block">
@@ -124,7 +124,7 @@
                 </form>
 
                 <div class="mt-10 text-center space-y-3">
-                    <p class="text-xs text-slate-400">সংস্করণ ১.০ · ঔষধ প্রশাসন অধিদপ্তর</p>
+                    <p class="text-xs text-slate-400">সংস্করণ ১.০ · {{ config('app.app_manage_name') }}</p>
                     <a href="https://mysoftheaven.com/" target="_blank" rel="noopener"
                        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition">
                         <span class="text-[13px] text-slate-500">কারিগরি সহযোগিতায়</span>

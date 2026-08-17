@@ -23,9 +23,14 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PackageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SmsController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('login'));
+
+Route::get('/pay-station/callback', [PaymentController::class, 'callbackPaymentProcess'])->name('pay-station.payment.callback');
+Route::get('/payment/complete/show-status-page/{invoice_number}', [PaymentController::class, 'showTransactionStatus'])->name('payment.complete.show-status-page');
+Route::get('/payment/success', [PaymentController::class, 'paymentSuccess'])->name('payment.paymentSuccess');
 
 // Fortify registers /login, /logout, /two-factor-challenge,
 // /forgot-password, /reset-password, /user/two-factor-authentication.
@@ -119,7 +124,10 @@ Route::middleware(['auth',  'active'])->group(function () {
     // Application review queue + workflow actions — open to any authenticated
     // staff member; the queue itself is scoped to their designation.
     Route::prefix('applications')->name('applications.')->group(function () {
+
         Route::get('/', [ApplicationController::class, 'index'])->name('index');
+        Route::get('search-by-tracking', [ApplicationController::class, 'searchWithTrackingNo'])->name('searchWithTrackingNo');
+
         Route::get('{application}', [ApplicationController::class, 'show'])->name('show');
         Route::post('{application}/comment', [ApplicationController::class, 'comment'])->name('comment');
         Route::post('{application}/forward', [ApplicationController::class, 'forward'])->name('forward');
@@ -129,6 +137,7 @@ Route::middleware(['auth',  'active'])->group(function () {
 
         Route::get('{application}/certificate/create', [CertificateController::class, 'create'])->name('certificate.create');
         Route::post('{application}/certificate', [CertificateController::class, 'store'])->name('certificate.store');
+
     });
 
     Route::prefix('certificates')->name('certificates.')->group(function () {
@@ -182,5 +191,14 @@ Route::middleware(['auth',  'active'])->group(function () {
     });
 
 
+    // Payment Routes
+    Route::get('/api/company-application/pay-station/payment/proceed', [PaymentController::class, 'processPayment'])->name('company.application.pay-station.payment.process');
+    Route::get('/api/device-application/pay-station/payment/proceed', [PaymentController::class, 'processDeviceApplicationPayment'])->name('device.application.pay-station.payment.process');
+    
+    
+    // SMS Route
+    Route::get('/send-sms', [SmsController::class, 'notifyThroughSms'])->name('notifyThroughSms');
+    
     // All Phase 0-6 modules are now wired up.
 });
+    

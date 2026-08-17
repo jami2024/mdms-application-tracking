@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\ActionCommentTemplate;
 use App\Models\Application;
 use App\Models\Certificate;
 use App\Models\Company;
@@ -17,6 +18,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
+
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
 
 class ApplicationController extends Controller
 {
@@ -55,10 +59,10 @@ class ApplicationController extends Controller
 
             // ->where('applicant_id', '=', $user->id)
 
-            ->whereDoesntHave(
-                'logs',
-                fn($q) => $q->where('acted_by', $user->id)
-            )
+            // ->whereDoesntHave(
+            //     'logs',
+            //     fn($q) => $q->where('acted_by', $user->id)
+            // )
 
             // Application No filter
             ->when(
@@ -115,8 +119,16 @@ class ApplicationController extends Controller
         );
     }
 
-    public function show(Application $application)
+    public function show($encryptedId)
     {
+        try {
+            $id = Crypt::decrypt($encryptedId);
+        } catch (DecryptException $e) {
+            abort(404);
+        }
+
+        $application = Application::findOrFail($id);
+
         $this->assertCanView($application);
 
         $application->load('applicant', 'applicable', 'currentStep.designation', 'assignedTo', 'workflowConfig.steps.designation', 'logs.actor', 'logs.fromStep', 'logs.toStep', 'comments.user', 'payments', 'certificate');
@@ -170,7 +182,9 @@ class ApplicationController extends Controller
         //     ->first();
         $nextDeskUsers = $this->nextDeskUsers($application);
 
-        return view('applications.show', compact('application', 'nextDeskUsers', 'packageApplication'));
+        $remarks_suggestion = ActionCommentTemplate::where('created_by', Auth::user()->id?? 1)->pluck('template')->toArray();
+
+        return view('applications.show', compact('application', 'nextDeskUsers', 'packageApplication', 'remarks_suggestion'));
     }
 
     public function comment(Request $request, Application $application)
@@ -523,5 +537,30 @@ class ApplicationController extends Controller
         activity('application')->causedBy(auth()->user())->performedOn($application)
             ->withProperties(['action' => $action, 'remarks' => $remarks])
             ->log("Application {$action}ed");
+    }
+
+    public function searchWithTrackingNo(Request $request)
+    {
+        // dd($request->all());
+        $validated = $request->validate([
+            'tracking_no' => ['required', 'string', 'max:100'],
+        ]);
+
+        $application = Application::with('ServiceApplications')->where('application_no', $validated['tracking_no'])->first();
+
+        if (! $application) {
+            return back()
+                ->withInput()
+                ->with('error', 'এই ট্র্যাকিং নম্বরে কোনো আবেদন পাওয়া যায়নি।');
+        }
+
+        // set session, application_id
+        session()->put('application_no', $application->application_no);
+
+        // dd($application);
+
+        // Redirect straight to the show page (matches your earlier encrypt(id) pattern)
+        // return redirect()->route('applications.show', encrypt($application->id));
+        return view('service.example-application-steps-page', compact('application'));
     }
 }

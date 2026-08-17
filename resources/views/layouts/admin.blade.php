@@ -182,11 +182,15 @@
                 </button>
 
                 <div class="flex-1 max-w-md relative hidden sm:block">
-                    <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-3.5-3.5"/>
-                    </svg>
-                    <input type="text" placeholder="প্রতিষ্ঠান, ডিভাইস, আবেদন খুঁজুন..."
-                           class="w-full rounded-full bg-slate-100 border-0 pl-10 pr-4 py-2.5 text-sm text-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none">
+                    <form action="{{ route('applications.searchWithTrackingNo') }}" method="GET"
+                        class="flex-1 max-w-md relative hidden sm:block">
+                        <svg class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <circle cx="11" cy="11" r="7"/><path stroke-linecap="round" d="M21 21l-3.5-3.5"/>
+                        </svg>
+                        <input type="text" name="tracking_no" value="{{ request('tracking_no') }}"
+                            placeholder="আবেদন নম্বর দ্বারা ট্র্যাকিং করুন ..."
+                            class="w-full rounded-full bg-slate-100 border-0 pl-10 pr-4 py-2.5 text-sm text-slate-600 placeholder:text-slate-400 focus:ring-2 focus:ring-brand-500 focus:bg-white outline-none">
+                    </form>
                 </div>
 
                 <div class="flex-1 sm:hidden"><h1 class="text-base font-semibold text-slate-800">@yield('title', 'ড্যাশবোর্ড')</h1></div>
@@ -232,7 +236,8 @@
                     <div class="relative">
                         <button @click="open = !open" class="flex items-center gap-2.5 bg-ink-900 rounded-full pl-2 pr-3.5 py-1.5 hover:bg-ink-800 transition">
                             <div class="h-8 w-8 rounded-full bg-brand-500 text-white flex items-center justify-center text-xs font-semibold shrink-0">
-                                {{ strtoupper(substr(auth()->user()->name ?? 'ব', 0, 1)) }}
+                                {{-- {{ strtoupper(substr(auth()->user()->name ?? 'ব', 0, 1)) }} --}}
+                                <img src="{{ asset('storage/' . auth()->user()->profile_photo_path) }}" alt="" class="h-8 w-8 rounded-full">
                             </div>
                             <div class="hidden sm:block text-left leading-tight">
                                 <p class="text-xs font-medium text-white">{{ auth()->user()->name ?? 'ব্যবহারকারী' }}</p>

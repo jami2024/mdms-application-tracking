@@ -4,6 +4,11 @@
     <div class="px-6 py-4 border-b border-slate-100 flex items-center gap-2">
         <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6M9 8h6M5 21h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
         <p class="text-sm font-semibold text-slate-800">আবেদনের সম্পূর্ণ তথ্য</p>
+        <button type="button" onclick="downloadReceipt()"
+                class="inline-flex items-center gap-1.5 text-xs font-semibold text-white bg-emerald-600 hover:bg-emerald-700 px-3.5 py-1.5 rounded-lg shadow-sm transition shrink-0">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H8a2 2 0 01-2-2V5a2 2 0 012-2h6l6 6v11a2 2 0 01-2 2z"/></svg>
+            রশিদ ডাউনলোড করুন (PDF)
+        </button>
     </div>
 
     @if($type === 'Company')
@@ -151,6 +156,66 @@
         <div class="flex justify-between"><span class="text-slate-500">অনুমোদিত এমআরপি</span><span class="font-medium text-emerald-700">৳ {{ number_format($e->approved_mrp, 2) }}</span></div>
         @endif
     </div>
+
+    @elseif($type === 'ServiceApplication')
+    <div class="p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-2.5 text-sm">
+        <div class="relative col-span-2 max-w-2xl mx-auto border border-slate-300 rounded-lg p-6 overflow-hidden" style="break-inside: avoid;" id="receipt-print-area">
+
+            {{-- Watermark: faint, centered, behind all content --}}
+            <img src="https://dgda.gov.bd/site-assets/images/logo.png" alt=""
+                    aria-hidden="true"
+                    class="pointer-events-none select-none absolute inset-0 m-auto w-56 h-56 object-contain opacity-[0.06] z-0"
+                    style="-webkit-print-color-adjust: exact; print-color-adjust: exact; color-adjust: exact;"
+                    onerror="this.remove()">
+
+            <div class="relative z-10">
+
+            {{-- Logo + title, centered together as one group --}}
+            <div class="flex flex-col items-center text-center gap-1.5 border-b border-slate-300 pb-3 mb-4">
+                <img src="https://dgda.gov.bd/site-assets/images/logo.png" alt="বাংলাদেশ সরকার"
+                        class="w-12 h-12 object-contain"
+                        onerror="this.style.display='none'">
+                <h2 class="text-lg font-bold text-slate-800">{{ config('app.app_manage_name') }}</h2>
+                {{-- <p class="text-lg text-slate-800">আবেদন গ্রহণের রশিদ</p>
+                <p class="text-xs text-slate-500">Application Acknowledgement Receipt</p> --}}
+            </div>
+
+            <div class="flex justify-between text-xs mb-4">
+                <span><strong>ট্র্যাকিং নম্বর:</strong> {{ $application->application_no?? '—' }}</span>
+                <span><strong>তারিখ ও সময়:</strong> {{ $application->created_at->format('d-m-Y')?? date('d-m-Y') }}</span>
+            </div>
+
+            <table class="w-full text-xs border-collapse">
+                <tbody>
+                    @php
+                        $rows = [
+                            'আবেদনকারীর নাম'   => $e->applicant_name ?? '—',
+                            'মোবাইল নম্বর'       => $e->mobile_number ?? '—',
+                            'ইমেইল'             => $e->email ?? '—',
+                            'প্রতিষ্ঠানের নাম'      => $e->company_name ?? '—',
+                            'পদবি'              => $e->designation ?? '—',
+                            'সার্ভিস নাম'         => $e->service_name ?? $e->service_id ?? '—',
+                        ];
+                    @endphp
+                    @foreach ($rows as $label => $value)
+                        <tr class="border-b border-slate-100">
+                            <td class="py-1 pr-3 text-slate-500 font-medium w-1/3 align-top">{{ $label }}</td>
+                            <td class="py-1 text-slate-800 font-semibold align-top">{{ $value }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+
+            <div class="mt-5 pt-3 border-t border-slate-200 text-[10px] text-slate-400 text-center">
+                এটি একটি স্বয়ংক্রিয়ভাবে তৈরি রশিদ। ভবিষ্যতে যোগাযোগের জন্য ট্র্যাকিং নম্বরটি সংরক্ষণ করুন।
+            </div>
+
+            </div>
+        </div>
+        @if($e->approved_mrp)
+        <div class="flex justify-between"><span class="text-slate-500">অনুমোদিত এমআরপি</span><span class="font-medium text-emerald-700">৳ {{ number_format($e->approved_mrp, 2) }}</span></div>
+        @endif
+    </div>
     @endif
 
     {{-- Lightbox --}}
@@ -167,3 +232,13 @@
         </div>
     </div>
 </div>
+
+<script>
+    // ---------- Receipt download (native browser print-to-PDF, keeps Bengali text intact) ----------
+    function downloadReceipt() {
+        const receipt = document.getElementById('receipt-print-area');
+        if (!receipt) return;
+        // receipt.classList.remove('hidden');
+        window.print();
+    }
+</script>

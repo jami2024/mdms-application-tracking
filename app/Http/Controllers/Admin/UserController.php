@@ -10,6 +10,7 @@ use App\Models\Organization;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Maatwebsite\Excel\Facades\Excel;
 use Spatie\Permission\Models\Role;
@@ -137,7 +138,13 @@ class UserController extends Controller
 
     public function profile()
     {
-        return view('admin.users.profile', ['user' => auth()->user()]);
+        $user = auth()->user();
+
+        $designations = Designation::where('organization_id', $user->organization_id)
+            ->where('status', 'active') // adjust to your actual "active" value if not boolean
+            ->orderBy('title')
+            ->get();
+        return view('admin.users.profile', compact('user', 'designations'));
     }
 
     public function updateProfile(Request $request)
@@ -145,12 +152,32 @@ class UserController extends Controller
         $user = auth()->user();
 
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:20'],
+            'name'           => ['required', 'string', 'max:255'],
+            'email'          => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone'          => ['nullable', 'string', 'max:20'],
+            'designation_id' => ['nullable', 'exists:designations,id'],
+            'profile_photo'  => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'], // 2MB
         ]);
 
-        $user->update($data);
+        // Handle photo upload
+        if ($request->hasFile('profile_photo')) {
+            // Remove old photo if one exists
+            if ($user->profile_photo_path) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+
+            $data['profile_photo_path'] = $request->file('profile_photo')
+                ->store('profile_photos', 'public');
+        }
+
+        // Rename designation_id -> keep as is since column matches
+        $user->update([
+            'name'                => $data['name'],
+            'email'                => $data['email'],
+            'phone'               => $data['phone'] ?? null,
+            'designation_id'      => $data['designation_id'] ?? null,
+            'profile_photo_path'  => $data['profile_photo_path'] ?? $user->profile_photo_path,
+        ]);
 
         return back()->with('status', 'Profile updated.');
     }

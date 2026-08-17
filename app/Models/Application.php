@@ -8,6 +8,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
+use Illuminate\Support\Facades\Crypt;
+use Illuminate\Contracts\Encryption\DecryptException;
+
 class Application extends Model
 {
     protected $fillable = [
@@ -64,4 +67,20 @@ class Application extends Model
     {
         return $this->hasMany(Payment::class);
     }
+
+    public function ServiceApplications()
+    {
+        return $this->belongsTo(ServiceApplication::class, 'applicable_id', 'id');
+    }
+
+    // public function resolveRouteBinding($value, $field = null)
+    // {
+    //     try {
+    //         $id = Crypt::decrypt($value);
+    //     } catch (DecryptException $e) {
+    //         abort(404);
+    //     }
+
+    //     return $this->where('id', $id)->firstOrFail();
+    // }
 }

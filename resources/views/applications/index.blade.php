@@ -33,7 +33,7 @@
             <select name="module"
                 class="rounded-none border border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/40 focus:border-emerald-500 outline-none hover:border-slate-400 shadow-sm transition">
 
-                <option value="">সব মডিউল</option>
+                <option value="">সব সার্ভিস</option>
 
                 @foreach ($modules as $module)
                     <option value="{{ $module }}" @selected(request('module') === $module)>
@@ -86,7 +86,7 @@
                                 <span
                                     class="text-xs font-medium px-2.5 py-1 rounded-none {{ $colors[$app->status] ?? 'bg-slate-100 text-slate-500' }}">{{ \App\Support\Bengali::label($app->status) }}</span>
                             </td>
-                            <td class="px-5 py-3.5 text-right"><a href="{{ route('applications.show', $app) }}"
+                            <td class="px-5 py-3.5 text-right"><a href="{{ route('applications.show', encrypt($app->id)) }}"
                                     class="text-brand-600 hover:underline">পর্যালোচনা</a></td>
                         </tr>
                     @empty

@@ -14,7 +14,7 @@
         $canAct =
             in_array($application->status, ['submitted', 'in_review', 'returned']) &&
             $application->applicant_id !== auth()->id() &&
-            !$application->logs->contains('acted_by', auth()->id()) &&
+            // !$application->logs->contains('acted_by', auth()->id()) &&
             (auth()->user()->hasRole('Admin') ||
                 ($application->assigned_to && $application->assigned_to === auth()->id()) ||
                 (!$application->assigned_to &&
@@ -22,11 +22,11 @@
                     $application->currentStep->designation_id === auth()->user()->designation_id));
         $paidPayment = $application->payments->whereIn('status', ['paid', 'reconciled'])->first();
         $actionIcons = [
-            'forward' => ['bg-blue-100 text-blue-600', 'M13 7l5 5-5 5M6 12h12'],
-            'backward' => ['bg-orange-100 text-orange-600', 'M11 17l-5-5 5-5M18 12H6'],
-            'approve' => ['bg-emerald-100 text-emerald-600', 'M5 13l4 4L19 7'],
-            'reject' => ['bg-red-100 text-red-600', 'M6 18L18 6M6 6l12 12'],
-            'submit' => ['bg-slate-200 text-slate-600', 'M12 4v16m8-8H4'],
+            'forward' => ['bg-blue-100 text-blue-600', 'M13 7l5 5-5 5M6 12h12', 'blue'],
+            'backward' => ['bg-orange-100 text-orange-600', 'M11 17l-5-5 5-5M18 12H6', 'orange'],
+            'approve' => ['bg-emerald-100 text-emerald-600', 'M5 13l4 4L19 7', 'emerald'],
+            'reject' => ['bg-red-100 text-red-600', 'M6 18L18 6M6 6l12 12', 'red'],
+            'submit' => ['bg-slate-200 text-slate-600', 'M12 4v16m8-8H4', 'slate'],
         ];
         $isFinalStep =
             $application->currentStep &&
@@ -188,7 +188,7 @@
                 @endif
 
                 {{-- History timeline --}}
-                <div class="bg-white rounded-none border border-slate-200 shadow-sm p-6">
+                {{-- <div class="bg-white rounded-none border border-slate-200 shadow-sm p-6">
                     <p class="text-sm font-semibold text-slate-800 mb-4">ইতিহাস ও মন্তব্য</p>
                     <div class="space-y-0">
                         @forelse($application->logs as $log)
@@ -222,6 +222,63 @@
                             <p class="text-sm text-slate-400 text-center py-4">এখনো কোনো সিদ্ধান্ত রেকর্ড হয়নি।</p>
                         @endforelse
                     </div>
+                </div> --}}
+
+                {{-- History timeline --}}
+                <div class="bg-white rounded-none border border-slate-200 shadow-sm p-6">
+                    <p class="text-sm font-semibold text-slate-800 mb-5">ইতিহাস ও মন্তব্য</p>
+
+                    <div class="space-y-0">
+                        @forelse($application->logs as $log)
+                            @php
+
+                                $icon = $actionIcons[$log->action] ?? ['bg-slate-100 text-slate-500', 'M12 8v4l3 3', 'slate'];
+                                [$iconClasses, $iconPath, $accent] = $icon;
+                            @endphp
+
+                            <div class="group flex gap-3 pb-6 last:pb-0 relative">
+                                @if (!$loop->last)
+                                    <div class="absolute left-4 top-9 bottom-0 w-px bg-slate-150 bg-slate-200"></div>
+                                @endif
+
+                                <div class="h-8 w-8 rounded-full {{ $iconClasses }} ring-4 ring-white flex items-center justify-center shrink-0 z-10 transition-transform group-hover:scale-105">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="{{ $iconPath }}" />
+                                    </svg>
+                                </div>
+
+                                <div class="flex-1 min-w-0 pt-0.5">
+                                    <div class="flex items-center justify-between gap-2 flex-wrap">
+                                        <div class="flex items-center gap-2 flex-wrap">
+                                            <span class="inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full bg-{{ $accent }}-50 text-{{ $accent }}-700 ring-1 ring-{{ $accent }}-200">
+                                                {{ \App\Support\Bengali::label($log->action) }}
+                                            </span>
+                                            <span class="text-xs text-slate-500">{{ $log->actor->name }}</span>
+                                            @if ($log->actor->designation)
+                                                <span class="text-[11px] text-slate-400">· {{ $log->actor->designation->short_code }}</span>
+                                            @endif
+                                        </div>
+                                        <p class="text-[11px] text-slate-400 whitespace-nowrap shrink-0 tabular-nums">
+                                            {{ $log->acted_at->format('d M, H:i') }}
+                                        </p>
+                                    </div>
+
+                                    @if ($log->remarks)
+                                        <p class="text-xs text-slate-600 mt-2 border-l-2 border-{{ $accent }}-200 bg-{{ $accent }}-50/40 rounded-none px-3 py-2 leading-relaxed">
+                                            {{ $log->remarks }}
+                                        </p>
+                                    @endif
+                                </div>
+                            </div>
+                        @empty
+                            <div class="text-center py-8">
+                                <svg class="w-8 h-8 mx-auto text-slate-300 mb-2" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <p class="text-sm text-slate-400">এখনো কোনো সিদ্ধান্ত রেকর্ড হয়নি।</p>
+                            </div>
+                        @endforelse
+                    </div>
                 </div>
             </div>
 
@@ -231,7 +288,7 @@
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-400">সারসংক্ষেপ</p>
                     <div class="space-y-3 text-sm">
                         <div>
-                            <p class="text-xs text-slate-400">মডিউল</p>
+                            <p class="text-xs text-slate-400">সেবার নাম</p>
                             <p class="font-medium text-slate-800">
                                 {{ \App\Support\Bengali::label($application->workflowConfig?->module) }}</p>
                         </div>
@@ -321,104 +378,122 @@
             <div x-show="modalOpen" x-cloak class="fixed inset-0 z-50 flex items-center justify-center p-4">
                 <div class="absolute inset-0 bg-slate-900/50 backdrop-blur-sm" @click="modalOpen = false"></div>
                 <div x-show="modalOpen" x-transition
-                    class="relative bg-white rounded-none shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-                    <div
-                        class="px-6 py-4 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
-                        <p class="text-base font-semibold text-slate-800">সিদ্ধান্ত নিন</p>
+                    class="relative bg-white rounded-none shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+                    <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between sticky top-0 bg-white z-10">
+                        <p class="text-sm font-semibold text-slate-800">সিদ্ধান্ত নিন</p>
                         <button @click="modalOpen = false" class="text-slate-400 hover:text-slate-600">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2"
-                                viewBox="0 0 24 24">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
                             </svg>
                         </button>
                     </div>
 
-                    <form method="POST" :action="urls[decision]" class="p-6 space-y-5">
+                    <form method="POST" :action="urls[decision]" enctype="multipart/form-data"
+                        x-data="{ remarksText: '' }" class="px-5 space-y-2 mb-2">
                         @csrf
 
+                        {{-- Decision type — compact single row --}}
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-2">সিদ্ধান্তের ধরন</label>
-                            <div class="grid grid-cols-2 gap-2">
-                                <label
-                                    class="flex items-center gap-2 border rounded-none px-3 py-2.5 cursor-pointer text-sm transition"
-                                    :class="decision === 'forward' ? 'border-blue-500 bg-blue-50 text-blue-700' :
-                                        'border-slate-200 text-slate-600 hover:bg-slate-50'">
-                                    <input type="radio" x-model="decision" value="forward" class="text-blue-600">
-                                    ফরওয়ার্ড
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">সিদ্ধান্তের ধরন</label>
+                            <div class="flex flex-wrap gap-4">
+                                <label class="flex items-center gap-1.5 border rounded-none px-2.5 py-1.5 cursor-pointer text-xs font-medium whitespace-nowrap transition"
+                                    :class="decision === 'forward' ? 'border-blue-500 bg-blue-50 text-blue-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
+                                    <input type="radio" x-model="decision" value="forward" class="w-3.5 h-3.5 text-blue-600">
+                                    প্রেরণ করুন
                                 </label>
+
                                 @if ($isFinalStep)
-                                    <label
-                                        class="flex items-center gap-2 border rounded-none px-3 py-2.5 cursor-pointer text-sm transition"
-                                        :class="decision === 'approve' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' :
-                                            'border-slate-200 text-slate-600 hover:bg-slate-50'">
-                                        <input type="radio" x-model="decision" value="approve"
-                                            class="text-emerald-600"> চূড়ান্ত অনুমোদন
+                                    <label class="flex items-center gap-1.5 border rounded-none px-2.5 py-1.5 cursor-pointer text-xs font-medium whitespace-nowrap transition"
+                                        :class="decision === 'approve' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
+                                        <input type="radio" x-model="decision" value="approve" class="w-3.5 h-3.5 text-emerald-600">
+                                        চূড়ান্ত অনুমোদন
                                     </label>
                                 @else
-                                    <label
-                                        class="flex items-center gap-2 border rounded-none px-3 py-2.5 cursor-pointer text-sm transition"
-                                        :class="decision === 'approve' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' :
-                                            'border-slate-200 text-slate-600 hover:bg-slate-50'">
-                                        <input type="radio" x-model="decision" value="approve"
-                                            class="text-emerald-600"> অনুমোদন (পরের ধাপে)
+                                    <label class="flex items-center gap-1.5 border rounded-none px-2.5 py-1.5 cursor-pointer text-xs font-medium whitespace-nowrap transition"
+                                        :class="decision === 'approve' ? 'border-emerald-500 bg-emerald-50 text-emerald-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
+                                        <input type="radio" x-model="decision" value="approve" class="w-3.5 h-3.5 text-emerald-600">
+                                        অনুমোদন
                                     </label>
                                 @endif
+
                                 @if ($application->currentStep?->can_send_back)
-                                    <label
-                                        class="flex items-center gap-2 border rounded-none px-3 py-2.5 cursor-pointer text-sm transition"
-                                        :class="decision === 'backward' ? 'border-orange-500 bg-orange-50 text-orange-700' :
-                                            'border-slate-200 text-slate-600 hover:bg-slate-50'">
-                                        <input type="radio" x-model="decision" value="backward"
-                                            class="text-orange-600"> ফেরত পাঠান
+                                    <label class="flex items-center gap-1.5 border rounded-none px-2.5 py-1.5 cursor-pointer text-xs font-medium whitespace-nowrap transition"
+                                        :class="decision === 'backward' ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
+                                        <input type="radio" x-model="decision" value="backward" class="w-3.5 h-3.5 text-orange-600">
+                                        ফেরত পাঠান
                                     </label>
                                 @endif
+
                                 @if ($application->currentStep?->can_reject)
-                                    <label
-                                        class="flex items-center gap-2 border rounded-none px-3 py-2.5 cursor-pointer text-sm transition"
-                                        :class="decision === 'reject' ? 'border-red-500 bg-red-50 text-red-700' :
-                                            'border-slate-200 text-slate-600 hover:bg-slate-50'">
-                                        <input type="radio" x-model="decision" value="reject" class="text-red-600">
-                                        প্রত্যাখ্যান
+                                    <label class="flex items-center gap-1.5 border rounded-none px-2.5 py-1.5 cursor-pointer text-xs font-medium whitespace-nowrap transition"
+                                        :class="decision === 'reject' ? 'border-red-500 bg-red-50 text-red-700' : 'border-slate-200 text-slate-600 hover:bg-slate-50'">
+                                        <input type="radio" x-model="decision" value="reject" class="w-3.5 h-3.5 text-red-600">
+                                        বাতিল
                                     </label>
                                 @endif
                             </div>
                         </div>
 
-                        {{-- Next-desk user picker — only relevant when forwarding --}}
+                        {{-- Next-desk user picker — mandatory when forwarding --}}
                         @if ($nextDeskUsers->isNotEmpty())
                             <div x-show="decision === 'forward'" x-cloak>
-                                <label class="block text-sm font-medium text-slate-700 mb-1.5">পরবর্তী ডেস্কে নির্দিষ্ট
-                                    ব্যক্তি (ঐচ্ছিক)</label>
-                                <select name="assigned_to"
-                                    class="w-full rounded-none border border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500/40 outline-none hover:border-slate-400 shadow-sm transition">
-                                    <option value="">— যেকোনো একজন (ডিজিগনেশন অনুযায়ী) —</option>
+                                <label class="block text-xs font-medium text-slate-700 mb-1.5">
+                                    পরবর্তী ডেস্কে নির্দিষ্ট ব্যক্তি
+                                    <span class="text-red-500 font-semibold">*</span>
+                                </label>
+                                <select name="assigned_to" :required="decision === 'forward'"
+                                    :class="decision === 'forward' ? 'border-red-300 focus:ring-red-500/40' : 'border-slate-300 focus:ring-emerald-500/40'"
+                                    class="w-full rounded-none border px-3 py-2 text-sm outline-none hover:border-slate-400 shadow-sm transition focus:ring-2">
+                                    <option value="" disabled selected>— নির্বাচন করুন —</option>
                                     @foreach ($nextDeskUsers as $u)
-                                        <option value="{{ $u->id }}">{{ $u->name }}
-                                            ({{ $u->designation->short_code ?? '' }})</option>
+                                        <option value="{{ $u->id }}">{{ $u->name }} ({{ $u->designation->short_code ?? '' }})</option>
                                     @endforeach
                                 </select>
-                                <p class="text-xs text-slate-400 mt-1">নির্বাচন না করলে ঐ পদের যেকোনো ব্যবহারকারী এটি দেখতে
-                                    ও অ্যাকশন নিতে পারবেন।</p>
+                                <p class="text-[11px] text-red-500 mt-1">* এই ফিল্ডটি পূরণ করা আবশ্যক।</p>
                             </div>
                         @endif
 
+                        {{-- Remarks with quick-fill suggestions --}}
                         <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1.5">
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">
                                 মন্তব্য / সিদ্ধান্তের কারণ
-                                <span x-show="decision === 'backward' || decision === 'reject'"
-                                    class="text-red-500">*</span>
+                                <span x-show="decision === 'backward' || decision === 'reject'" class="text-red-500">*</span>
+                                <span class="text-slate-400 font-normal">(দ্রুত পুরনের জন্য টেম্পলেট ক্লিক করুন)</span>
                             </label>
-                            <textarea name="remarks" rows="3" :required="decision === 'backward' || decision === 'reject'"
+
+                            @if (!empty($remarks_suggestion))
+                                <div class="flex flex-wrap gap-1.5 mb-1.5">
+                                    @foreach ($remarks_suggestion as $suggestion)
+                                        <button type="button" @click="remarksText = @js($suggestion)"
+                                            title="{{ $suggestion }}"
+                                            class="max-w-[45%] truncate rounded-none border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] text-slate-600 hover:bg-slate-100 hover:border-slate-300 transition">
+                                            {{ $suggestion }}
+                                        </button>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            <textarea name="remarks" rows="3" x-model="remarksText"
+                                :required="decision === 'backward' || decision === 'reject'"
+                                :class="(decision === 'backward' || decision === 'reject') ? 'border-red-300 focus:ring-red-500' : 'border-slate-300 focus:ring-emerald-500'"
                                 placeholder="আপনার সিদ্ধান্তের কারণ লিখুন…"
-                                class="w-full rounded-none border-2 border-slate-300 px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 outline-none"></textarea>
+                                class="w-full rounded-none border-2 px-3 py-2 text-sm outline-none focus:ring-2"></textarea>
                         </div>
 
-                        <div class="flex items-center justify-end gap-2 pt-2">
+                        {{-- Attachment — optional, PDF only --}}
+                        <div>
+                            <label class="block text-xs font-medium text-slate-700 mb-1.5">
+                                সংযুক্তি <span class="text-slate-400 font-normal">(ঐচ্ছিক, শুধুমাত্র PDF)</span>
+                            </label>
+                            <input type="file" name="attachment" accept=".pdf,application/pdf"
+                                class="w-full text-xs text-slate-600 rounded-none border border-slate-300 file:mr-3 file:py-1.5 file:px-3 file:border-0 file:border-r file:border-slate-300 file:bg-slate-50 file:text-xs file:font-medium file:text-slate-600 hover:file:bg-slate-100 cursor-pointer">
+                        </div>
+
+                        <div class="flex items-center justify-end gap-2 pt-1">
                             <button type="button" @click="modalOpen = false"
-                                class="px-4 py-2.5 rounded-none border border-slate-300 bg-white text-sm hover:bg-slate-50 transition">বাতিল</button>
+                                class="px-3.5 py-2 rounded-none border border-slate-300 bg-white text-xs font-medium hover:bg-slate-50 transition">বাতিল</button>
                             <button type="submit"
-                                class="px-6 py-2.5 rounded-none bg-ink-900 text-white text-sm hover:bg-slate-800 transition">নিশ্চিত
-                                করুন</button>
+                                class="px-5 py-2 rounded-none bg-ink-900 text-white text-xs font-medium hover:bg-slate-800 transition">নিশ্চিত করুন</button>
                         </div>
                     </form>
                 </div>
