@@ -56,16 +56,27 @@ class UserController extends Controller
             'designation_id' => ['nullable', 'exists:designations,id'],
             'organization_id' => ['nullable', 'exists:organizations,id'],
             'role' => ['required', 'exists:roles,name'],
+            'profile_photo' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
         ]);
 
-        $user = User::create([
-            ...collect($data)->except(['password', 'role'])->toArray(),
-            'password' => Hash::make($data['password']),
-            'created_by' => auth()->id(),
-        ]);
+        // Prepare user data
+        $userData = collect($data)->except(['password', 'role', 'profile_photo'])->toArray();
+        $userData['password'] = Hash::make($data['password']);
+        $userData['created_by'] = auth()->id();
 
+        // Handle profile photo upload
+        if ($request->hasFile('profile_photo')) {
+            $path = $request->file('profile_photo')->store('profile_photos', 'public');
+            $userData['profile_photo_path'] = $path;
+        }
+
+        // Create user
+        $user = User::create($userData);
+
+        // Assign role
         $user->assignRole($data['role']);
 
+        // Log activity
         activity('user')->causedBy(auth()->user())->performedOn($user)
             ->log('User account created');
 
@@ -84,17 +95,32 @@ class UserController extends Controller
     public function update(Request $request, User $user)
     {
         $data = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
-            'phone' => ['nullable', 'string', 'max:20'],
-            'user_type' => ['required', 'in:admin,staff,applicant'],
-            'status' => ['required', 'in:active,inactive,suspended,pending'],
-            'designation_id' => ['nullable', 'exists:designations,id'],
-            'organization_id' => ['nullable', 'exists:organizations,id'],
-            'role' => ['required', 'exists:roles,name'],
+            'name'             => ['required', 'string', 'max:255'],
+            'email'            => ['required', 'email', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone'            => ['nullable', 'string', 'max:20'],
+            'user_type'        => ['required', 'in:admin,staff,applicant'],
+            'status'           => ['required', 'in:active,inactive,suspended,pending'],
+            'designation_id'   => ['nullable', 'exists:designations,id'],
+            'organization_id'  => ['nullable', 'exists:organizations,id'],
+            'role'             => ['required', 'exists:roles,name'],
+            'profile_photo'    => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:2048'],
+            'remove_photo'     => ['nullable', 'boolean'],
         ]);
 
-        $user->update(collect($data)->except('role')->toArray());
+        // Handle photo upload / removal
+        if ($request->hasFile('profile_photo')) {
+            if ($user->profile_photo_path) {
+                Storage::disk('public')->delete($user->profile_photo_path);
+            }
+            $data['profile_photo_path'] = $request->file('profile_photo')->store('profile_photos', 'public');
+        } elseif ($request->boolean('remove_photo') && $user->profile_photo_path) {
+            Storage::disk('public')->delete($user->profile_photo_path);
+            $data['profile_photo_path'] = null;
+        }
+
+        $user->update(
+            collect($data)->except(['role', 'profile_photo', 'remove_photo'])->toArray()
+        );
         $user->syncRoles([$data['role']]);
 
         activity('user')->causedBy(auth()->user())->performedOn($user)
