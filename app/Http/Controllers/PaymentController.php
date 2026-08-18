@@ -67,7 +67,7 @@ class PaymentController extends Controller
         $cust_phone = $service_application_data->mobile_number ?? null;
         $cust_email = $service_application_data->email ?? null;
 
-        $base_url = env('APP_ENV') === 'local' ? 'http://mdms_app_track.test' : env('APP_URL');
+        $base_url = env('APP_ENV') === 'local' ? 'https://dgda-tracking.mysoftheaven.com' : env('APP_URL');
 
         $callback_url = $base_url . '/pay-station/callback';
         $cancel_url = $base_url . '/pay-station/cancel';
@@ -372,6 +372,7 @@ class PaymentController extends Controller
 
         $response = json_decode(curl_exec($curl));
         curl_close($curl);
+        dd($response);
         return $response;
     }
 
@@ -403,8 +404,8 @@ class PaymentController extends Controller
                                 $application->current_step_id = $firstStepId;
                                 $application->assigned_to = 2;
                                 $application->save();
-                                
-                                
+
+
                                 $payment = [
                                     'trx_id'         => $payment->invoice_number?? '--',
                                     'paid_at'        => date('d-m-Y h:i A')?? '--',
